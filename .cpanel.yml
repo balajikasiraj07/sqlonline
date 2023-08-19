@@ -1,9 +1,5 @@
+
 deployment:
   tasks:
     - export DEPLOYPATH=/home/wgbiqz9gz1ez/public_html/
-    - /bin/cp -R /home/wgbiqz9gz1ez/repo_folder/assets/* $DEPLOYPATH    - /bin/cp -R css $DEPLOYPATH
-    - /bin/cp -R /home/wgbiqz9gz1ez/repo_folder/images/* $DEPLOYPATH    - /bin/cp -R css $DEPLOYPATH
-    - /bin/cp /home/wgbiqz9gz1ez/repo_folder/index.html $DEPLOYPATH
-    - /bin/cp /home/wgbiqz9gz1ez/repo_folder/sitemap.xml $DEPLOYPATH
-    - /bin/cp /home/wgbiqz9gz1ez/repo_folder/favicon.ico $DEPLOYPATH
-    /bin/cp index.html $DEPLOYPATH
+    - /bin/cp -R * $DEPLOYPATH
