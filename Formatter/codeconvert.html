@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Formatter</title>
+    <link rel="stylesheet" href="stylecss.css">
+</head>
+<body>
+    <div class="container">
+        <form id="sql-form" action="process.php" method="post">
+            <div class="box">
+                <textarea id="input-area" name="input-query" placeholder="Enter SQL query here"></textarea>
+                <button type="button" id="convert-button">Convert</button>
+            </div>
+            <div class="box">
+                <textarea id="output-area" placeholder="Formatted SQL query" readonly></textarea>
+            </div>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
