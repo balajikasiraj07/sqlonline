@@ -1,4 +1,14 @@
 document.getElementById('convert-button').addEventListener('click', function() {
+    convertQuery();
+});
+
+document.getElementById('input-area').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        convertQuery();
+    }
+});
+
+function convertQuery() {
     const inputQuery = document.getElementById('input-area').value;
 
     fetch('process.php', {
@@ -17,4 +27,8 @@ document.getElementById('convert-button').addEventListener('click', function() {
     .catch(error => {
         console.error('Error:', error);
     });
-});
+}
+
+
+
+
