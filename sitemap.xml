@@ -8,13 +8,18 @@
 
 
 <url>
-  <loc>http://sqlonline.in/</loc>
-  <lastmod>2023-07-29T08:19:59+00:00</lastmod>
+  <loc>https://sqlonline.in/</loc>
+  <lastmod>2024-05-26T17:06:52+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>http://sqlonline.in/index.html</loc>
-  <lastmod>2023-07-29T08:19:59+00:00</lastmod>
+  <loc>https://sqlonline.in/index.html</loc>
+  <lastmod>2024-05-26T17:06:52+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://sqlonline.in/Formatter/codeconvert.html</loc>
+  <lastmod>2024-05-26T17:06:52+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 
