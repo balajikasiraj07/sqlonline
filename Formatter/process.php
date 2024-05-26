@@ -37,8 +37,6 @@ class SQLFormatter {
             case 'WHEN':
             case 'ELSE':
                     return "\t$keyword";
-            case ',':
-                return ",\n\t"; // New line and tab space after commas
             default:
                 return " $keyword "; // Single space before and after for other keywords
         }
