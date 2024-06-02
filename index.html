@@ -24,6 +24,9 @@
 	})(window,document,'script','dataLayer','GTM-5L7GNQXZ');</script>
 	<!-- End Google Tag Manager -->
 	
+	<script src="https://apis.google.com/js/platform.js"></script>
+
+
 	</head>
 	<body class="is-preload">
 
@@ -39,15 +42,28 @@
 								<header id="header">
 									<a href="index.html" class="logo"><strong>SQL Online</strong> by Balaji Kasiraj</a>
 									
-									<ul class="icons">
-										<li class="like-button">
-											<div class="heart-bg">
-												<div class="heart-icon"></div>
-											</div>
-										</li>
-									</ul>
-									
 								</header>
+								<div class="container">
+									<h1>Online SQL Formatter Tool</h1>
+									<p>Use this tool to format and beautify your SQL queries for better readability and performance.</p>
+									
+									<form id="sql-form" action="process.php" method="post">
+										<div class="box-container">
+											<div class="box">
+												<label for="input-area">Enter SQL query here:</label>
+												<textarea id="input-area" name="input-query" placeholder="Enter SQL query here"></textarea>
+											</div>
+											<div class="box">
+												<label for="output-area">Formatted SQL query:</label>
+												<textarea id="output-area" placeholder="Formatted SQL query" readonly></textarea>
+											</div>
+										</div>
+										
+										<button type="button" id="convert-button">Format Query</button>
+									</form>
+								</div>
+								
+								
 
 							<!-- Banner -->
 								<section id="banner">
@@ -57,12 +73,28 @@
 											<p>Business/Product Analyst</p>
 										</header>
 										<p>Greetings! </br> I am Balaji, a Product and Business Analyst with 4.5 years of invaluable experience. When I found myself facing a career transition after being laid off, I saw it as an opportunity to share my expertise and knowledge with the world. That's when I embarked on an exciting journey as a YouTube educator, where I passionately teach various aspects of Product and Business Analysis. </p>
-										
+										<div class="g-ytsubscribe" data-channelid="UCqYQw1g5z_4E3-h3cPkRXKg" data-layout="full" data-count="default"></div>
 									</div>
 									<span class="image object">
 										<img src="images/Profile Pic.jpeg" alt="" />
 									</span>
 								</section>
+									
+								<header id="subtitle">
+									<strong>My Work Experience</strong>
+								</header>
+								
+								<div class="ticker-container">
+									<div class="ticker">
+										<img src="images/Autoninja.jpeg" alt="Logo 1">
+										<img src="images/ICICI Lombard.png" alt="Logo 2">
+										<img src="images/Dunzo.png" alt="Logo 3">
+										<img src="images/Awign.png" alt="Logo 4">
+										<img src="images/Phonepe.png" alt="Logo 5">
+										<!-- Add more logos as needed -->
+									</div>
+								</div>
+								
 
 							<!-- Section -->
 								<section>
@@ -145,68 +177,7 @@
 						</div>
 					</div>
 
-				<!-- Sidebar -->
-					<div id="sidebar">
-						<div class="inner">
-
-							<!-- Search -->
-								<section id="search" class="alt">
-									<form method="post" action="#">
-										<input type="text" name="query" id="query" placeholder="Search" />
-									</form>
-								</section>
-
-							<!-- Menu -->
-								<nav id="menu">
-									<header class="major">
-										<h2>Menu</h2>
-									</header>
-									<ul>
-										<li><a href="index.html">Homepage</a></li>
-										<li><a href="Formatter/codeconvert.html">Code Beautifyer (Coming Soon)</a></li> <!-- Add this line to link to the community page -->
-									</ul>
-								</nav>
-
-							<!-- Section -->
-								<section>
-									<header class="major">
-										<h2>Work Experience</h2>
-									</header>
-									<div class="mini-posts">
-										<article>
-											<h2>Awign</h2>
-										</article>
-										<article>
-											<h2>Dunzo</h2>
-										</article>
-										<article>
-											<h2>ICICI Lombard</h2>										</article>
-										<article>
-											<h2>AutoNinja</h2>										</article>
-									</div>
-								</section>
-
-							<!-- Section -->
-								<section>
-									<header class="major">
-										<h2>Get in touch</h2>
-									</header>
-									<p></p>
-									<ul class="contact">
-										<li class="icon solid fa-envelope"><a href="#">balaji.kasiraju@gmail.com</a></li>
-										<li class="icon solid fa-home">Peak Bengaluru<br />India</li>
-									</ul>
-								</section>
-
-							<!-- Footer -->
-								<footer id="footer">
-									<p class="copyright">&copy; All rights reserved.</p>
-								</footer>
-
-						</div>
-					</div>
-
-			</div>
+				
 
 		<!-- Scripts -->
 			<script src="assets/js/jquery.min.js"></script>
@@ -214,7 +185,8 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
-			<script src="assets/js/heart.js"></script>
+			<script src="assets/js/scroll.js"></script>
+			<script src="assets/js/script.js"></script>
 
 	</body>
 </html>
