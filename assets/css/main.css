@@ -1140,7 +1140,6 @@ textarea {
   height: 500px; /* Adjust height as needed */
   resize: none;
 }
-
 /* Style for the ticker container */
 .ticker-container {
   width: 100%;
@@ -1175,7 +1174,7 @@ textarea {
   }
 
   .ticker-container {
-    overflow-x: auto; /* Allow horizontal scrolling */
+    overflow-x: scroll; /* Allow horizontal scrolling */
   }
 
   .ticker {
@@ -1192,7 +1191,7 @@ textarea {
   }
 
   .ticker-container {
-    overflow-x: auto; /* Allow horizontal scrolling */
+    overflow-x: scroll; /* Allow horizontal scrolling */
   }
 
   .ticker {
@@ -1209,7 +1208,7 @@ textarea {
   }
 
   .ticker-container {
-    overflow-x: auto; /* Allow horizontal scrolling */
+    overflow-x: scroll; /* Allow horizontal scrolling */
   }
 
   .ticker {
