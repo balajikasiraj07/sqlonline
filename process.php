@@ -13,9 +13,7 @@ class SQLFormatter {
                     case 'INSERT':
                     case 'UPDATE':
                     case 'DELETE':
-                    case 'FROM':
-                    case 'WHERE':
-                        return "\n$keyword\n\t"; // New line before and tab space after these keywords
+                        return "$keyword\n\t"; // New line before and tab space after these keywords
                     case 'WHERE':
                     case 'JOIN':
                     case 'LEFT JOIN':
@@ -27,6 +25,8 @@ class SQLFormatter {
                     case 'LIMIT':
                     case 'OFFSET':
                     case 'UNION':
+                    case 'FROM':
+                    case 'WHERE':
                         return "\n$keyword\n\t"; // New line before and tab space after these keywords
                     case 'WHEN':
                     case 'ELSE':
@@ -41,8 +41,12 @@ class SQLFormatter {
         // Handle commas separately if not inside specific functions
         $formattedSql = $this->handleCommas($formattedSql);
 
+
+     
         // Apply the nested SELECT indentation logic
         $formattedSql = $this->indentNestedSelects($formattedSql);
+
+
 
         // Apply the nested SELECT indentation logic
         $formattedSql = $this->uppercaseKeywords($formattedSql);
@@ -94,38 +98,51 @@ class SQLFormatter {
     private function indentNestedSelects($sql) {
         $lines = explode("\n", $sql);
         $indentLevel = 0;
+        $selectIndentLevel = 0;
         $formattedLines = [];
         $additionalIndentation = "\t"; // 1 tab space
-        $halfIndentation = "    "; // 0.5 tab space (4 spaces assuming a tab is 8 spaces)
-        
-        foreach ($lines as $line) {
+
+        foreach ($lines as $index => $line) {
             $trimmedLine = trim($line);
-            
-            // Accumulate the number of opening and closing parentheses
+            $upperTrimmedLine = strtoupper($trimmedLine);
+
+            // Adjust indent level based on parentheses count
             $openingParentheses = substr_count($trimmedLine, '(');
             $closingParentheses = substr_count($trimmedLine, ')');
-    
-            // Adjust indent level based on parentheses count
-            $indentLevel += $openingParentheses;
-            $indentLevel -= $closingParentheses;
-    
-            // Ensure indent level doesn't go negative
-            $indentLevel = max($indentLevel, 0);
-            
-            // Apply indentation
-            if (stripos($trimmedLine, 'SELECT') === 0) {
+
+            if ($upperTrimmedLine === 'SELECT' && $index === 0) {
+                $selectIndentLevel = $indentLevel + 1;
                 $formattedLines[] = str_repeat($additionalIndentation, $indentLevel) . $trimmedLine;
+                $indentLevel += $openingParentheses - $closingParentheses;
+                continue;
+            }
+
+            if ($upperTrimmedLine === 'SELECT') {
+                $selectIndentLevel = $indentLevel;
+                $formattedLines[] = str_repeat($additionalIndentation, $indentLevel) . $trimmedLine;
+                $indentLevel += $openingParentheses - $closingParentheses;
+                continue;
+            }
+
+            if ($selectIndentLevel > 0) {
+                $formattedLines[] = str_repeat($additionalIndentation, $indentLevel + 1) . $trimmedLine;
             } else {
-                if ($indentLevel > 0) {
-                    $formattedLines[] = str_repeat($additionalIndentation, $indentLevel - 1) . $halfIndentation . $trimmedLine;
-                } else {
-                    $formattedLines[] = $trimmedLine;
-                }
+                $formattedLines[] = str_repeat($additionalIndentation, $indentLevel) . $trimmedLine;
+            }
+
+            $indentLevel += $openingParentheses - $closingParentheses;
+            if ($indentLevel < 0) {
+                $indentLevel = 0;
+                $selectIndentLevel = 0;
             }
         }
-        
+
         return implode("\n", $formattedLines);
     }
+
+
+
+    
 
     public function uppercaseKeywords($sql) {
         // List of keywords to be uppercased
