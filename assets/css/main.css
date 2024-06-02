@@ -1141,8 +1141,6 @@ textarea {
   resize: none;
 }
 
-
-
 /* Style for the ticker container */
 .ticker-container {
   width: 100%;
@@ -1156,8 +1154,7 @@ textarea {
 .ticker {
   display: inline-block;
   white-space: nowrap;
-
-  
+  animation: ticker 10s linear infinite;
 }
 
 /* Style for the logos */
@@ -1168,16 +1165,85 @@ textarea {
   vertical-align: middle;
 }
 
-/* Keyframes for scrolling animation */
-@keyframes scroll {
-  0% {
-      transform: translateX(0);
+/* Media queries for different screen sizes */
+
+/* Extra small devices (phones, 0px and up) */
+@media (max-width: 575.98px) {
+  .ticker img {
+    height: 50px; /* Adjust the height for extra small devices */
+    margin-right: 15px; /* Adjust the margin for extra small devices */
   }
-  100% {
-      transform: translateX(-100%);
+
+  .ticker-container {
+    overflow-x: auto; /* Allow horizontal scrolling */
+  }
+
+  .ticker {
+    display: flex;
+    flex-wrap: nowrap;
   }
 }
-    
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .ticker img {
+    height: 60px; /* Adjust the height for small devices */
+    margin-right: 20px; /* Adjust the margin for small devices */
+  }
+
+  .ticker-container {
+    overflow-x: auto; /* Allow horizontal scrolling */
+  }
+
+  .ticker {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .ticker img {
+    height: 80px; /* Adjust the height for medium devices */
+    margin-right: 30px; /* Adjust the margin for medium devices */
+  }
+
+  .ticker-container {
+    overflow-x: auto; /* Allow horizontal scrolling */
+  }
+
+  .ticker {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .ticker img {
+    height: 100px; /* Adjust the height for large devices */
+    margin-right: 50px; /* Adjust the margin for large devices */
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .ticker img {
+    height: 120px; /* Default height for extra large devices */
+    margin-right: 125px; /* Default margin for extra large devices */
+  }
+}
+
+/* Add keyframes for ticker animation */
+@keyframes ticker {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 
 /* Container for YouTube Subscribe Button */
 .subscribe-container {
