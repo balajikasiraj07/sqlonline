@@ -61,19 +61,31 @@ class SQLFormatter {
         $formattedQuery = '';
         $insideFunction = false;
         $functionStack = [];
-
+        $insideSingleQuote = false;
+        $insideDoubleQuote = false;
+    
         for ($i = 0; $i < strlen($sql); $i++) {
             $char = $sql[$i];
-
-            if ($char === '(' && $i > 0) {
+    
+            // Toggle insideSingleQuote status
+            if ($char === "'" && !$insideDoubleQuote) {
+                $insideSingleQuote = !$insideSingleQuote;
+            }
+    
+            // Toggle insideDoubleQuote status
+            if ($char === '"' && !$insideSingleQuote) {
+                $insideDoubleQuote = !$insideDoubleQuote;
+            }
+    
+            if ($char === '(' && !$insideSingleQuote && !$insideDoubleQuote) {
                 $prefix = substr($sql, 0, $i);
                 if (preg_match('/\b(count|sum|avg|min|max|over|concat|coalesce)\s*$/i', $prefix)) {
                     $insideFunction = true;
                     $functionStack[] = $prefix;
                 }
             }
-
-            if ($char === ')') {
+    
+            if ($char === ')' && !$insideSingleQuote && !$insideDoubleQuote) {
                 if ($insideFunction && !empty($functionStack)) {
                     array_pop($functionStack);
                     if (empty($functionStack)) {
@@ -81,19 +93,17 @@ class SQLFormatter {
                     }
                 }
             }
-
-            if ($char === ',' && !$insideFunction) {
+    
+            if ($char === ',' && !$insideFunction && !$insideSingleQuote && !$insideDoubleQuote) {
                 $formattedQuery .= ",\n\t";
             } else {
                 $formattedQuery .= $char;
             }
         }
-
+    
         return $formattedQuery;
     }
-
-
-
+    
 
     private function indentNestedSelects($sql) {
         $lines = explode("\n", $sql);
