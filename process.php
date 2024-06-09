@@ -29,7 +29,6 @@ class SQLFormatter {
                     case 'WHERE':
                         return "\n$keyword\n\t"; // New line before and tab space after these keywords
                     case 'WHEN':
-                    case 'ELSE':
                         return "\n\t$keyword"; // New line and tab before these keywords
                     default:
                         return " $keyword "; // Single space before and after for other keywords
@@ -79,7 +78,7 @@ class SQLFormatter {
     
             if ($char === '(' && !$insideSingleQuote && !$insideDoubleQuote) {
                 $prefix = substr($sql, 0, $i);
-                if (preg_match('/\b(count|sum|avg|min|max|over|concat|coalesce)\s*$/i', $prefix)) {
+                if (preg_match('/\b(count|sum|avg|min|max|over|concat|coalesce|in|date_sub)\s*$/i', $prefix)) {
                     $insideFunction = true;
                     $functionStack[] = $prefix;
                 }
@@ -99,11 +98,17 @@ class SQLFormatter {
             } else {
                 $formattedQuery .= $char;
             }
+
+          
+            
         }
     
         return $formattedQuery;
     }
     
+
+
+
 
     private function indentNestedSelects($sql) {
         $lines = explode("\n", $sql);
@@ -151,7 +156,7 @@ class SQLFormatter {
     }
 
 
-
+    
     
 
     public function uppercaseKeywords($sql) {
@@ -177,6 +182,8 @@ class SQLFormatter {
 
         return $uppercasedSql;
     }
+
+    
 
     
     
