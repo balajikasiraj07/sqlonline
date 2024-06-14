@@ -1,4 +1,20 @@
 User-agent: *
 Allow: /
+
+# Disallow crawling of unnecessary or sensitive directories
+Disallow: /cgi-bin/
+Disallow: /tmp/
+Disallow: /junk/
 Disallow: /private/
+
+# Allow all search engines to access CSS, JS, and image files
+Allow: /assets/css/
+Allow: /assets/js/
+Allow: /images/
+
+# Disallow specific query parameters (if any) that create duplicate content
+Disallow: /*?sessionid=
+Disallow: /*?utm_source=
+
+# Sitemap location (ensure you have a sitemap.xml at the specified location)
 Sitemap: https://sqlonline.in/sitemap.xml
