@@ -2133,47 +2133,45 @@ button,
 
 
 /* Header SQL Online by Balaji Kasiraj*/
-/* Header Styles */
 #header {
   display: flex;
   border-bottom: solid 5px #f56a6a;
   padding: 6em 0 1em 0;
-  position: relative; 
+  position: relative;
 }
 #header > * {
   flex: 1;
-  margin-bottom: 0; 
+  margin-bottom: 0;
 }
 #header .logo {
   border-bottom: 0;
   color: inherit;
-  font-family: "Roboto Slab", serif;
-  font-size: 1.125em; 
+  font-size: 1.125em;
 }
 #header .icons {
-  text-align: right; 
+  text-align: right;
 }
 
 @media screen and (max-width: 1680px) {
   #header {
-    padding-top: 5em; 
+    padding-top: 5em;
   }
 }
 
 @media screen and (max-width: 736px) {
   #header {
-    padding-top: 6.5em; 
+    padding-top: 6.5em;
   }
   #header .logo {
     font-size: 1.25em;
-    margin: 0; 
+    margin: 0;
   }
   #header .icons {
     height: 5em;
     line-height: 5em;
     position: absolute;
     right: -0.5em;
-    top: 0; 
+    top: 0;
   }
 }
 
@@ -2196,19 +2194,19 @@ button,
 /* Responsive Design */
 @media (max-width: 768px) {
   #subtitle {
-    padding: 15px; 
+    padding: 15px;
   }
   #subtitle strong {
-    font-size: 1.2em; 
+    font-size: 1.2em;
   }
 }
 
 @media (max-width: 480px) {
   #subtitle {
-    padding: 10px; 
+    padding: 10px;
   }
   #subtitle strong {
-    font-size: 1em; 
+    font-size: 1em;
   }
 }
 
