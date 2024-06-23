@@ -2066,7 +2066,7 @@ button,
     width: 100%; 
   }
   .posts article {
-    margin: 0 0 4.5em 0;
+    margin: 0 0 6em 0; /* Ensure proper separation between posts */
     width: 100%; /* Adjusted for single column on small screens */
   }
   .posts article:before {
