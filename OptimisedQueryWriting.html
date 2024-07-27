@@ -60,7 +60,7 @@
             <p>If you see each Record is put into folders i.e year and month. <br> Considering that everything is in ascending order, your eyes will scroll down to 2024, then January and finally the records against it. There is absolutely no necessity for you to look at other years like 2023 or other months like February and March. This is essentially 3 units of effort against case 1 where it is 15 units.</p>
             <p>The entire computation is down by 80%. This is how optimisation works. Using a partition where clause to only fetch the records needed in the output, reduces the computation power and also the time taken for the query to run.</p>
             <p>Now when you scale this to say 1 TB of available data, you only end up processing 200GB of data or lesser (basis use case) and save on computation and time.</p>
-            <h3>Refrain from using ORDER BY in a Sub Query</h3>
+            <h3>2. Refrain from using ORDER BY in a Sub Query</h3>
                 <p>But why?</p>
                 <p>Consider this simple Query:</p>
                 <pre><code>
