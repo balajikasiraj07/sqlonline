@@ -9,17 +9,22 @@
 
 <url>
 <loc>https://sqlonline.in/</loc>
-<lastmod>2024-07-23T17:55:47+00:00</lastmod>
+<lastmod>2024-08-03T14:14:15+00:00</lastmod>
 <priority>1.00</priority>
 </url>
 <url>
 <loc>https://sqlonline.in/OrderOfExecutionSQL.html</loc>
-<lastmod>2024-07-23T17:55:47+00:00</lastmod>
+<lastmod>2024-08-03T14:14:15+00:00</lastmod>
 <priority>0.95</priority>
 </url>
 <url>
 <loc>https://sqlonline.in/OptimisedQueryWriting.html</loc>
-<lastmod>2024-07-23T17:55:47+00:00</lastmod>
+<lastmod>2024-08-03T14:14:15+00:00</lastmod>
+<priority>0.95</priority>
+</url>
+<url>
+<loc>https://sqlonline.in/CommonSQLMisconception.html</loc>
+<lastmod>2024-08-03T14:14:15+00:00</lastmod>
 <priority>0.95</priority>
 </url>
 
