@@ -112,7 +112,7 @@ FROM
             <h3>Explaining for Better Understanding</h3>
             <p><strong>Using a CTE:</strong></p>
             <p>Imagine you have 12 containers to process your data, and the data to be processed is 100 GB. <br>The query executed in step 1 needs to be stored somewhere, which is the RAM. It occupies space (let’s say 6 containers) and stays there until the query completes. This space remains occupied, whether it’s being actively used or not. Now, the remainder of the query has only 6 containers to process the rest of the data.</p>
-            <p><img src="images/RAM Optimisation/Container.webp" alt="CTE Example" class="article-image"></p>
+            <p><img src="images/RAM Optimisation/Container.webp" alt="CTE Example" class="article-image" loading="lazy" width="500" height="400"></p>
 
             <p><strong>Using a Subquery Instead:</strong></p>
             <p>The query at any point has the entirety of 12 containers to process the data.<br>More containers mean faster execution—here, potentially 2x faster because the query processes in parallel. Imagine each container processes 10 GB. Even if the subquery portion needs to be executed twice, there's sufficient processing space, and once completed, the rest of the query has all 12 containers available.
