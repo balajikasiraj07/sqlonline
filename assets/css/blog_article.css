@@ -278,6 +278,30 @@ h3 {
     line-height: 1.6;
 }
 
+/* Container for YouTube Subscribe Button */
+.subscribe-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    max-width: 200px;
+    transition: box-shadow 0.3s ease-in-out;
+}
 
+.subscribe-container:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Customizing the YouTube Subscribe Button */
+.g-ytsubscribe {
+    transform: scale(1.5); /* Adjust the scale to make it bigger */
+    -webkit-transform: scale(1.5);
+    -ms-transform: scale(1.5);
+    transform-origin: center center;
+}
 
 
