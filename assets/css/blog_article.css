@@ -304,4 +304,11 @@ h3 {
     transform-origin: center center;
 }
 
+/* Ensure the ad stays within the container on mobile */
+.adsbygoogle {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+}
+
 
