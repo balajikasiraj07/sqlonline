@@ -53,6 +53,7 @@ class SQLFormatter {
         
         return trim($sql);
     }
+
     
     private function applyConsistentIndentation(string $sql): string {
         // Define the keywords that should trigger indentation of following lines
