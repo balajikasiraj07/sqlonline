@@ -76,14 +76,18 @@
 											<div class="box">
 												<label for="input-area">Enter SQL query here:</label>
 												<textarea id="input-area" name="input-query" placeholder="Enter SQL query here"></textarea>
+												<div style="text-align: right; margin-top: 8px;">
+													<button type="button" id="convert-button">Format Query</button>
+												</div>
 											</div>
 											<div class="box">
 												<label for="output-area">Formatted SQL query:</label>
 												<textarea id="output-area" placeholder="Formatted SQL query" readonly></textarea>
+												<div style="text-align: right; margin-top: 8px;">
+													<button type="button" id="copy-button">📋 Copy SQL</button>
+												</div>
 											</div>
-										</div>
-										
-										<button type="button" id="convert-button">Format Query</button>
+										</div>	
 									</form>
 								</div>
 								
@@ -247,6 +251,10 @@
     <!-- Async for independent scripts -->
     <script src="assets/js/scroll.js" async></script>
     <script src="assets/js/script.js" async></script>
+
+	<script src="assets/js/copy-button.js"></script>
+
+	
 
 	</body>
 </html>
