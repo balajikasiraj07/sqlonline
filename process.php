@@ -55,8 +55,13 @@ class SQLFormatter {
         $sql = $this->formatWithClauses($sql);
         $sql = $this->formatKeywords($sql);
         $sql = $this->formatSelectFields($sql);
-        $sql = $this->formatInClauses($sql);
         
+        // PHASE 1 FIX: Format IN clauses BEFORE WHERE clause
+        // This ensures IN clauses are properly formatted but won't interfere with WHERE logic
+        $sql = $this->formatInClausesOutsideWhere($sql);
+        
+        // PHASE 1 FIX: Add WHERE clause formatting
+        $sql = $this->formatWhereClause($sql);
         
         $sql = $this->formatGroupByClause($sql);
         $sql = $this->formatOrderByClause($sql);
@@ -74,6 +79,345 @@ class SQLFormatter {
         $sql = $this->restoreBlocks($sql);
         
         return trim($sql);
+    }
+
+    // PHASE 1 IMPROVEMENT: Enhanced WHERE clause formatting
+    private function formatWhereClause(string $sql): string {
+        // Check if there's a WHERE clause
+        if (!preg_match('/\bWHERE\b/i', $sql)) {
+            return $sql;
+        }
+        
+        // More precise regex to capture WHERE clause content
+        $pattern = '/\b(WHERE)\s+(.*?)(?=\s*(?:GROUP\s+BY|HAVING|ORDER\s+BY|LIMIT|UNION(?:\s+ALL)?|;|$))/is';
+        
+        return preg_replace_callback(
+            $pattern,
+            function($matches) {
+                $whereKeyword = $matches[1];
+                $whereConditions = trim($matches[2]);
+                
+                // Remove leading AND/OR if present (common SQL error)
+                $whereConditions = preg_replace('/^\s*(AND|OR)\s+/i', '', $whereConditions);
+                
+                // Format the conditions
+                $formattedConditions = $this->formatLogicalConditions($whereConditions);
+                
+                return "\n" . $whereKeyword . $formattedConditions;
+            },
+            $sql
+        );
+    }
+
+    // PHASE 1 IMPROVEMENT: New method for formatting logical conditions
+    private function formatLogicalConditions(string $conditions): string {
+        if (empty(trim($conditions))) {
+            return '';
+        }
+        
+        // Parse conditions into a tree structure
+        $conditionTree = $this->parseConditions($conditions);
+        
+        // Format the tree back into SQL
+        return $this->formatConditionTree($conditionTree, 0, true);
+    }
+
+    // PHASE 1 IMPROVEMENT: Parse conditions respecting parentheses and operators
+    private function parseConditions(string $conditions): array {
+        $tokens = $this->tokenizeConditions($conditions);
+        return $this->buildConditionTree($tokens);
+    }
+
+    // PHASE 1 IMPROVEMENT: Enhanced tokenizer for WHERE conditions
+    private function tokenizeConditions(string $conditions): array {
+        $tokens = [];
+        $current = '';
+        $length = strlen($conditions);
+        $i = 0;
+        
+        while ($i < $length) {
+            // Skip whitespace
+            while ($i < $length && ctype_space($conditions[$i])) {
+                $current .= $conditions[$i];
+                $i++;
+            }
+            
+            if ($i >= $length) break;
+            
+            // Check for AND operator (with word boundary check)
+            if ($i + 3 <= $length) {
+                $threeChars = substr($conditions, $i, 3);
+                $afterThree = ($i + 3 < $length) ? $conditions[$i + 3] : ' ';
+                if (strtoupper($threeChars) === 'AND' && (ctype_space($afterThree) || $afterThree === '(')) {
+                    // Save current token if any
+                    if (!empty(trim($current))) {
+                        $tokens[] = ['type' => 'condition', 'value' => trim($current)];
+                        $current = '';
+                    }
+                    $tokens[] = ['type' => 'operator', 'value' => 'AND'];
+                    $i += 3;
+                    continue;
+                }
+            }
+            
+            // Check for OR operator (with word boundary check)
+            if ($i + 2 <= $length) {
+                $twoChars = substr($conditions, $i, 2);
+                $afterTwo = ($i + 2 < $length) ? $conditions[$i + 2] : ' ';
+                if (strtoupper($twoChars) === 'OR' && (ctype_space($afterTwo) || $afterTwo === '(')) {
+                    // Save current token if any
+                    if (!empty(trim($current))) {
+                        $tokens[] = ['type' => 'condition', 'value' => trim($current)];
+                        $current = '';
+                    }
+                    $tokens[] = ['type' => 'operator', 'value' => 'OR'];
+                    $i += 2;
+                    continue;
+                }
+            }
+            
+            // Handle parentheses
+            if ($conditions[$i] === '(') {
+                // Check if this is part of a function or IN clause
+                $beforeParen = trim($current);
+                if (preg_match('/\b(IN|[A-Z_]+)\s*$/i', $beforeParen)) {
+                    // This is a function or IN clause, include parentheses in current token
+                    $current .= '(';
+                    $i++;
+                    $parenDepth = 1;
+                    
+                    // Capture everything until matching close paren
+                    while ($i < $length && $parenDepth > 0) {
+                        if ($conditions[$i] === '(') {
+                            $parenDepth++;
+                        } elseif ($conditions[$i] === ')') {
+                            $parenDepth--;
+                        }
+                        $current .= $conditions[$i];
+                        $i++;
+                    }
+                    continue;
+                } else {
+                    // This is a grouping parenthesis
+                    if (!empty(trim($current))) {
+                        $tokens[] = ['type' => 'condition', 'value' => trim($current)];
+                        $current = '';
+                    }
+                    $tokens[] = ['type' => 'paren', 'value' => '('];
+                    $i++;
+                    continue;
+                }
+            }
+            
+            if ($conditions[$i] === ')') {
+                if (!empty(trim($current))) {
+                    $tokens[] = ['type' => 'condition', 'value' => trim($current)];
+                    $current = '';
+                }
+                $tokens[] = ['type' => 'paren', 'value' => ')'];
+                $i++;
+                continue;
+            }
+            
+            // Check if we're at the start of a string literal
+            if ($conditions[$i] === "'" || $conditions[$i] === '"') {
+                $quote = $conditions[$i];
+                $current .= $quote;
+                $i++;
+                
+                // Continue until we find the closing quote
+                while ($i < $length) {
+                    $current .= $conditions[$i];
+                    if ($conditions[$i] === $quote && ($i === 0 || $conditions[$i-1] !== '\\')) {
+                        $i++;
+                        break;
+                    }
+                    $i++;
+                }
+                continue;
+            }
+            
+            // Regular character
+            $current .= $conditions[$i];
+            $i++;
+        }
+        
+        // Don't forget the last token
+        if (!empty(trim($current))) {
+            $tokens[] = ['type' => 'condition', 'value' => trim($current)];
+        }
+        
+        return $tokens;
+    }
+
+    // PHASE 1 IMPROVEMENT: Build condition tree from tokens
+    private function buildConditionTree(array $tokens): array {
+        if (empty($tokens)) {
+            return [];
+        }
+        
+        // Handle simple case - single condition
+        if (count($tokens) === 1 && $tokens[0]['type'] === 'condition') {
+            return ['type' => 'condition', 'value' => $tokens[0]['value']];
+        }
+        
+        // Process parentheses first
+        $processed = $this->processParentheses($tokens);
+        
+        // Then process OR operators (lower precedence)
+        $processed = $this->processOperator($processed, 'OR');
+        
+        // Then process AND operators (higher precedence)
+        $processed = $this->processOperator($processed, 'AND');
+        
+        return $processed;
+    }
+
+    // PHASE 1 IMPROVEMENT: Process parentheses in tokens
+    private function processParentheses(array $tokens): array {
+        $result = [];
+        $i = 0;
+        
+        while ($i < count($tokens)) {
+            if ($tokens[$i]['type'] === 'paren' && $tokens[$i]['value'] === '(') {
+                // Find matching closing paren
+                $depth = 1;
+                $start = $i + 1;
+                $j = $start;
+                
+                while ($j < count($tokens) && $depth > 0) {
+                    if ($tokens[$j]['type'] === 'paren') {
+                        if ($tokens[$j]['value'] === '(') {
+                            $depth++;
+                        } else {
+                            $depth--;
+                        }
+                    }
+                    $j++;
+                }
+                
+                // Extract tokens within parentheses
+                $innerTokens = array_slice($tokens, $start, $j - $start - 1);
+                
+                // If the inner tokens form a simple condition, keep them together
+                if ($this->isSimpleCondition($innerTokens)) {
+                    $result[] = ['type' => 'group', 'value' => $innerTokens, 'simple' => true];
+                } else {
+                    $innerTree = $this->buildConditionTree($innerTokens);
+                    $result[] = ['type' => 'group', 'value' => $innerTree];
+                }
+                
+                $i = $j;
+            } else {
+                $result[] = $tokens[$i];
+                $i++;
+            }
+        }
+        
+        return $result;
+    }
+    
+    // Helper method to check if tokens form a simple condition
+    private function isSimpleCondition(array $tokens): bool {
+        // A simple condition has pattern: condition [operator condition]*
+        if (empty($tokens)) return false;
+        
+        $expectCondition = true;
+        foreach ($tokens as $token) {
+            if ($expectCondition) {
+                if ($token['type'] !== 'condition') return false;
+                $expectCondition = false;
+            } else {
+                if ($token['type'] !== 'operator') return false;
+                $expectCondition = true;
+            }
+        }
+        
+        return !$expectCondition; // Should end with a condition
+    }
+
+    // PHASE 1 IMPROVEMENT: Process logical operators
+    private function processOperator(array $tokens, string $operator): array {
+        if (count($tokens) <= 1) {
+            return $tokens;
+        }
+        
+        // Find the operator
+        $opIndex = -1;
+        for ($i = count($tokens) - 1; $i >= 0; $i--) {
+            if ($tokens[$i]['type'] === 'operator' && $tokens[$i]['value'] === $operator) {
+                $opIndex = $i;
+                break;
+            }
+        }
+        
+        if ($opIndex === -1) {
+            // No operator found, return as is
+            return count($tokens) === 1 ? $tokens[0] : $tokens;
+        }
+        
+        // Split at operator
+        $left = array_slice($tokens, 0, $opIndex);
+        $right = array_slice($tokens, $opIndex + 1);
+        
+        return [
+            'type' => 'logical',
+            'operator' => $operator,
+            'left' => $this->processOperator($left, $operator),
+            'right' => $this->processOperator($right, $operator)
+        ];
+    }
+
+    // PHASE 1 IMPROVEMENT: Format condition tree back to SQL
+    private function formatConditionTree($tree, int $depth = 0, bool $isFirst = false): string {
+        if (empty($tree)) {
+            return '';
+        }
+        
+        $indent = str_repeat($this->indentation, $depth + 1);
+        
+        if (isset($tree['type'])) {
+            switch ($tree['type']) {
+                case 'condition':
+                    return ($isFirst ? "\n" . $indent : '') . $tree['value'];
+                    
+                case 'group':
+                    // Handle simple grouped conditions differently
+                    if (isset($tree['simple']) && $tree['simple']) {
+                        $parts = [];
+                        foreach ($tree['value'] as $token) {
+                            if ($token['type'] === 'condition') {
+                                $parts[] = $token['value'];
+                            } elseif ($token['type'] === 'operator') {
+                                $parts[] = $token['value'];
+                            }
+                        }
+                        return '(' . implode(' ', $parts) . ')';
+                    } else {
+                        $inner = $this->formatConditionTree($tree['value'], $depth, false);
+                        return '(' . $inner . ')';
+                    }
+                    
+                case 'logical':
+                    $left = $this->formatConditionTree($tree['left'], $depth, $isFirst);
+                    $right = $this->formatConditionTree($tree['right'], $depth, false);
+                    
+                    // If right side is just a condition (not another logical operation), keep it on same line
+                    if (is_array($tree['right']) && isset($tree['right']['type']) && 
+                        ($tree['right']['type'] === 'condition' || $tree['right']['type'] === 'group')) {
+                        return $left . ' ' . $tree['operator'] . ' ' . $right;
+                    }
+                    
+                    return $left . "\n" . $indent . $tree['operator'] . ' ' . $right;
+            }
+        }
+        
+        // Handle array of conditions
+        if (is_array($tree) && isset($tree[0])) {
+            return $this->formatConditionTree($tree[0], $depth, $isFirst);
+        }
+        
+        return '';
     }
 
     // Format WITH clauses (Common Table Expressions)
@@ -269,230 +613,22 @@ class SQLFormatter {
         
         return implode("\n", $result);
     }
-
-    private function formatWhereClause(string $sql): string {
-        // Locate the WHERE keyword position
-        if (!preg_match('/\bWHERE\b/i', $sql)) {
-            return $sql; // No WHERE clause found
-        }
-        
-        // Split SQL into parts: before WHERE, WHERE clause itself, and everything after
-        $parts = preg_split('/\b(WHERE)\b/i', $sql, 2, PREG_SPLIT_DELIM_CAPTURE);
-        if (count($parts) < 3) {
-            return $sql; // Something went wrong with the split
-        }
-        
-        $beforeWhere = $parts[0];
-        $whereKeyword = $parts[1]; // This will be "WHERE"
-        $afterWhereAll = $parts[2]; // This contains the WHERE conditions AND all following clauses
-        
-        // Now split the after-WHERE part to separate the conditions from later clauses
-        $nextClauseKeywords = ['GROUP BY', 'ORDER BY', 'LIMIT', 'HAVING', 'UNION', 'UNION ALL'];
-        $whereConditions = $afterWhereAll;
-        $afterClauses = '';
-        
-        // Find the first occurrence of any next clause keyword
-        $firstNextClausePos = PHP_INT_MAX;
-        $matchedKeyword = '';
-        
-        foreach ($nextClauseKeywords as $keyword) {
-            $pos = stripos($afterWhereAll, $keyword);
-            if ($pos !== false && $pos < $firstNextClausePos) {
-                // Check this is a standalone keyword, not part of another word
-                $wordBoundaryPattern = '/\b' . preg_quote($keyword, '/') . '\b/i';
-                if (preg_match($wordBoundaryPattern, $afterWhereAll, $matches, PREG_OFFSET_CAPTURE)) {
-                    $pos = $matches[0][1];
-                    $firstNextClausePos = $pos;
-                    $matchedKeyword = $keyword;
-                }
-            }
-        }
-        
-        // If we found a next clause, split the WHERE conditions from later clauses
-        if ($firstNextClausePos < PHP_INT_MAX) {
-            $whereConditions = substr($afterWhereAll, 0, $firstNextClausePos);
-            $afterClauses = substr($afterWhereAll, $firstNextClausePos);
-        }
-        
-        // Special handling for incorrect SQL where first condition starts with AND/OR
-        $whereConditions = trim($whereConditions);
-        if (preg_match('/^\s*(AND|OR)\b\s*/i', $whereConditions)) {
-            // Remove the first AND/OR as it's a common SQL editing mistake
-            $whereConditions = preg_replace('/^\s*(AND|OR)\b\s*/i', '', $whereConditions);
-        }
-        
-        // Format the WHERE conditions
-        $formattedConditions = $this->formatAndConditions($whereConditions);
-        
-        // Reassemble the SQL with the formatted WHERE clause and preserving everything else
-        return $beforeWhere . $whereKeyword . $formattedConditions . $afterClauses;
-    }
-
-    private function tokenizeWhereClause(string $whereClause): array {
-        $tokens = [];
-        $currentToken = '';
-        $parenLevel = 0;
-        $length = strlen($whereClause);
-        $inString = false;
-        $stringChar = '';
-        
-        // Trim leading/trailing whitespace
-        $whereClause = trim($whereClause);
-        
-        $i = 0;
-        while ($i < $length) {
-            $char = $whereClause[$i];
-            $nextChar = ($i + 1 < $length) ? $whereClause[$i + 1] : '';
-            
-            // Handle string literals
-            if (($char === "'" || $char === '"' || $char === '`') && ($i === 0 || $whereClause[$i-1] !== '\\')) {
-                if (!$inString) {
-                    $inString = true;
-                    $stringChar = $char;
-                } elseif ($char === $stringChar) {
-                    $inString = false;
-                }
-            }
-            
-            // Track parenthesis nesting level (only when not in a string)
-            if (!$inString) {
-                if ($char === '(') {
-                    $parenLevel++;
-                } elseif ($char === ')') {
-                    $parenLevel--;
-                }
-                
-                // Look for AND/OR operators at the top level
-                if ($parenLevel === 0 && !$inString) {
-                    // Look for AND pattern, ensuring it's a whole word
-                    $andMatch = false;
-                    if ($i === 0 && strtoupper(substr($whereClause, 0, 4)) === 'AND ') {
-                        $andMatch = true;
-                        $tokens[] = "AND"; // Operator itself
-                        $i += 4; // Skip "AND "
-                        $currentToken = '';
-                        continue;
-                    } elseif ($i > 0 && strtoupper(substr($whereClause, $i-1, 5)) === ' AND ') {
-                        $andMatch = true;
-                        // Add the token before AND if not empty
-                        if (!empty(trim($currentToken))) {
-                            $tokens[] = trim($currentToken);
-                        }
-                        $currentToken = '';
-                        $tokens[] = "AND"; // Operator itself
-                        $i += 4; // Skip "AND "
-                        continue;
-                    }
-                    
-                    // Look for OR pattern, ensuring it's a whole word
-                    $orMatch = false;
-                    if ($i === 0 && strtoupper(substr($whereClause, 0, 3)) === 'OR ') {
-                        $orMatch = true;
-                        $tokens[] = "OR"; // Operator itself
-                        $i += 3; // Skip "OR "
-                        $currentToken = '';
-                        continue;
-                    } elseif ($i > 0 && strtoupper(substr($whereClause, $i-1, 4)) === ' OR ') {
-                        $orMatch = true;
-                        // Add the token before OR if not empty
-                        if (!empty(trim($currentToken))) {
-                            $tokens[] = trim($currentToken);
-                        }
-                        $currentToken = '';
-                        $tokens[] = "OR"; // Operator itself
-                        $i += 3; // Skip "OR "
-                        continue;
-                    }
-                }
-            }
-            
-            // Add current character to token
-            $currentToken .= $char;
-            $i++;
-        }
-        
-        // Add the last token if any
-        if (trim($currentToken) !== '') {
-            $tokens[] = trim($currentToken);
-        }
-        
-        return $tokens;
-    }
     
-    private function formatAndConditions(string $whereClause): string {
-        // Normalize spaces
-        $whereClause = trim($whereClause);
-        $whereClause = preg_replace('/\s+AND\s+/i', ' AND ', $whereClause);
-        $whereClause = preg_replace('/\s+OR\s+/i', ' OR ', $whereClause);
+    // New method to format IN clauses outside of WHERE clause
+    private function formatInClausesOutsideWhere(string $sql): string {
+        // Only format IN clauses that are NOT within a WHERE clause
+        $parts = preg_split('/\bWHERE\b/i', $sql, 2);
         
-        // If no logical operators, just return the clause
-        if (stripos($whereClause, ' AND ') === false && stripos($whereClause, ' OR ') === false &&
-            stripos($whereClause, 'AND ') !== 0 && stripos($whereClause, 'OR ') !== 0) {
-            return ' ' . $whereClause;
+        if (count($parts) === 1) {
+            // No WHERE clause, format all IN clauses
+            return $this->formatInClauses($sql);
         }
         
-        // Split the where clause into tokens
-        $tokens = $this->tokenizeWhereClause($whereClause);
+        // Format IN clauses in the part before WHERE
+        $beforeWhere = $this->formatInClauses($parts[0]);
         
-        // If tokenization failed or no tokens, return original
-        if (empty($tokens)) {
-            return ' ' . $whereClause;
-        }
-        
-        // Check if we start with an operator
-        $startsWithOperator = (strtoupper($tokens[0]) === 'AND' || strtoupper($tokens[0]) === 'OR');
-        
-        // Build the formatted result
-        $result = '';
-        $currentIndent = $this->indentation;
-        $currentOperator = null;
-        $inSubquery = false;
-        $parenLevel = 0;
-        
-        // Process all tokens
-        for ($i = 0; $i < count($tokens); $i++) {
-            $token = $tokens[$i];
-            $isOperator = (strtoupper($token) === 'AND' || strtoupper($token) === 'OR');
-            
-            if ($isOperator) {
-                $currentOperator = strtoupper($token);
-                // Don't add anything yet, wait for the condition
-            } else {
-                // This is a condition
-                
-                // Count nested parentheses
-                $openParens = substr_count($token, '(');
-                $closeParens = substr_count($token, ')');
-                $parenDiff = $openParens - $closeParens;
-                
-                // Handle nesting for indentation
-                if ($parenDiff > 0) {
-                    $inSubquery = true;
-                } elseif ($parenDiff < 0 && $parenLevel + $parenDiff <= 0) {
-                    $inSubquery = false;
-                }
-                $parenLevel += $parenDiff;
-                
-                // Determine indentation
-                $nestedIndent = $inSubquery ? $currentIndent . $this->indentation : $currentIndent;
-                
-                // First condition without operator
-                if ($result === '' && !$startsWithOperator) {
-                    $result = ' ' . $token;
-                } else {
-                    // Add operator + condition
-                    if ($currentOperator) {
-                        $result .= "\n" . $nestedIndent . $currentOperator . " " . $token;
-                        $currentOperator = null;
-                    } else {
-                        // This shouldn't happen with proper tokenization
-                        $result .= " " . $token;
-                    }
-                }
-            }
-        }
-        
-        return $result;
+        // Don't format IN clauses after WHERE - let WHERE handler deal with them
+        return $beforeWhere . 'WHERE' . $parts[1];
     }
     
     private function formatInClauses(string $sql): string {
