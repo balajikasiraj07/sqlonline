@@ -56,6 +56,9 @@ class SQLFormatter {
         $sql = $this->formatKeywords($sql);
         $sql = $this->formatSelectFields($sql);
         
+        // Format CASE statements
+        $sql = $this->formatCaseStatements($sql);
+
         // PHASE 1 FIX: Format IN clauses BEFORE WHERE clause
         // This ensures IN clauses are properly formatted but won't interfere with WHERE logic
         $sql = $this->formatInClausesOutsideWhere($sql);
@@ -79,6 +82,558 @@ class SQLFormatter {
         $sql = $this->restoreBlocks($sql);
         
         return trim($sql);
+    }
+
+    // CASE STATEMENT FORMATTING METHODS
+    private function formatCaseStatements(string $sql): string {
+        // Simple approach: find complete CASE...END blocks and format them one by one
+        $result = $sql;
+        $maxIterations = 5;
+        $iteration = 0;
+        
+        // Keep formatting until no more CASE statements need formatting
+        while ($iteration < $maxIterations) {
+            $oldResult = $result;
+            $result = $this->formatNextCaseStatement($result);
+            
+            // If nothing changed, we're done
+            if ($result === $oldResult) {
+                break;
+            }
+            $iteration++;
+        }
+        
+        return $result;
+    }
+
+    private function formatCaseBlockSimple(string $caseBlock): string {
+        $caseBlock = trim($caseBlock);
+        
+        // Remove the outer CASE and END
+        $content = preg_replace('/^\s*CASE\s*/i', '', $caseBlock);
+        $content = preg_replace('/\s*END\s*$/i', '', $content);
+        
+        // Split into tokens manually
+        $tokens = $this->tokenizeCaseContent($content);
+        
+        $result = "CASE";
+        $currentWhen = '';
+        $currentThen = '';
+        $inWhen = false;
+        $inThen = false;
+        $elseContent = '';
+        
+        foreach ($tokens as $token) {
+            $upperToken = strtoupper(trim($token));
+            
+            if ($upperToken === 'WHEN') {
+                // Finish previous WHEN/THEN if any
+                if ($inThen && !empty($currentWhen) && !empty($currentThen)) {
+                    $result .= "\n" . $this->indentation . "WHEN " . trim($currentWhen) . " THEN " . trim($currentThen);
+                    $currentWhen = '';
+                    $currentThen = '';
+                }
+                $inWhen = true;
+                $inThen = false;
+            } elseif ($upperToken === 'THEN') {
+                $inWhen = false;
+                $inThen = true;
+            } elseif ($upperToken === 'ELSE') {
+                // Finish current WHEN/THEN
+                if ($inThen && !empty($currentWhen) && !empty($currentThen)) {
+                    $result .= "\n" . $this->indentation . "WHEN " . trim($currentWhen) . " THEN " . trim($currentThen);
+                    $currentWhen = '';
+                    $currentThen = '';
+                }
+                $inWhen = false;
+                $inThen = false;
+            } else {
+                // Regular content
+                if ($inWhen) {
+                    $currentWhen .= ' ' . $token;
+                } elseif ($inThen) {
+                    $currentThen .= ' ' . $token;
+                } elseif (!$inWhen && !$inThen) {
+                    // This is ELSE content
+                    $elseContent .= ' ' . $token;
+                }
+            }
+        }
+        
+        // Finish the last WHEN/THEN
+        if (!empty($currentWhen) && !empty($currentThen)) {
+            $result .= "\n" . $this->indentation . "WHEN " . trim($currentWhen) . " THEN " . trim($currentThen);
+        }
+        
+        // Add ELSE if present
+        if (!empty(trim($elseContent))) {
+            $result .= "\n" . $this->indentation . "ELSE " . trim($elseContent);
+        }
+        
+        $result .= "\nEND";
+        
+        return $result;
+    }
+
+    private function findMatchingEndSimple(string $sql, int $caseStart) {
+        $caseCount = 0;
+        $i = $caseStart;
+        $length = strlen($sql);
+        $inQuote = false;
+        $quoteChar = '';
+        
+        while ($i < $length - 2) {
+            $char = $sql[$i];
+            
+            // Handle quotes
+            if (!$inQuote && ($char === "'" || $char === '"')) {
+                $inQuote = true;
+                $quoteChar = $char;
+            } elseif ($inQuote && $char === $quoteChar) {
+                $inQuote = false;
+            }
+            
+            if (!$inQuote) {
+                // Check for CASE
+                if (strtoupper(substr($sql, $i, 4)) === 'CASE' && 
+                    (!ctype_alnum($sql[$i-1] ?? ' ')) && 
+                    (!ctype_alnum($sql[$i+4] ?? ' '))) {
+                    $caseCount++;
+                    $i += 4;
+                    continue;
+                }
+                
+                // Check for END
+                if (strtoupper(substr($sql, $i, 3)) === 'END' && 
+                    (!ctype_alnum($sql[$i-1] ?? ' ')) && 
+                    (!ctype_alnum($sql[$i+3] ?? ' '))) {
+                    $caseCount--;
+                    if ($caseCount === 0) {
+                        return $i;
+                    }
+                    $i += 3;
+                    continue;
+                }
+            }
+            
+            $i++;
+        }
+        
+        return false;
+    }
+    
+    private function isCaseAlreadyFormatted(string $caseBlock): bool {
+        // Simple check: if it contains newlines with proper indentation, consider it formatted
+        return (strpos($caseBlock, "\n" . $this->indentation . "WHEN") !== false);
+    }
+    
+    private function tokenizeCaseContent(string $content): array {
+        $tokens = [];
+        $current = '';
+        $inQuote = false;
+        $quoteChar = '';
+        $length = strlen($content);
+        
+        for ($i = 0; $i < $length; $i++) {
+            $char = $content[$i];
+            
+            if (!$inQuote && ($char === "'" || $char === '"')) {
+                $inQuote = true;
+                $quoteChar = $char;
+                $current .= $char;
+            } elseif ($inQuote && $char === $quoteChar) {
+                $inQuote = false;
+                $current .= $char;
+            } elseif (!$inQuote) {
+                // Check for keywords
+                $remaining = substr($content, $i);
+                if (preg_match('/^(WHEN|THEN|ELSE)\b/i', $remaining, $matches)) {
+                    if (!empty(trim($current))) {
+                        $tokens[] = trim($current);
+                        $current = '';
+                    }
+                    $tokens[] = $matches[1];
+                    $i += strlen($matches[1]) - 1; // -1 because loop will increment
+                } else {
+                    $current .= $char;
+                }
+            } else {
+                $current .= $char;
+            }
+        }
+        
+        if (!empty(trim($current))) {
+            $tokens[] = trim($current);
+        }
+        
+        return $tokens;
+    }
+
+    private function formatNextCaseStatement(string $sql): string {
+        // Find the first CASE statement that needs formatting
+        $casePos = stripos($sql, 'CASE');
+        if ($casePos === false) {
+            return $sql; // No CASE found
+        }
+        
+        // Find the matching END for this CASE
+        $endPos = $this->findMatchingEndSimple($sql, $casePos);
+        if ($endPos === false) {
+            return $sql; // No matching END found
+        }
+        
+        // Extract the CASE block
+        $beforeCase = substr($sql, 0, $casePos);
+        $caseBlock = substr($sql, $casePos, $endPos - $casePos + 3); // +3 for "END"
+        $afterCase = substr($sql, $endPos + 3);
+        
+        // Check if this CASE block is already well-formatted
+        if ($this->isCaseAlreadyFormatted($caseBlock)) {
+            // Skip this one, look for the next
+            $remainingPart = $this->formatNextCaseStatement($afterCase);
+            return $beforeCase . $caseBlock . $remainingPart;
+        }
+        
+        // Format this CASE block
+        $formattedCase = $this->formatCaseBlockSimple($caseBlock);
+        
+        return $beforeCase . $formattedCase . $afterCase;
+    }
+
+    private function findMatchingEnd(string $sql, int $caseStart) {
+        $caseCount = 1; // Start with 1 since we're already at a CASE
+        $i = $caseStart + 4; // Start after the initial CASE
+        $length = strlen($sql);
+        $inQuote = false;
+        $quoteChar = '';
+        
+        while ($i < $length) {
+            $char = $sql[$i];
+            
+            // Handle quotes
+            if (!$inQuote && ($char === "'" || $char === '"')) {
+                $inQuote = true;
+                $quoteChar = $char;
+            } elseif ($inQuote && $char === $quoteChar && ($i === 0 || $sql[$i-1] !== '\\')) {
+                $inQuote = false;
+                $quoteChar = '';
+            }
+            
+            if (!$inQuote) {
+                // Check for CASE keyword (word boundary check)
+                if ($i + 4 <= $length && strtoupper(substr($sql, $i, 4)) === 'CASE') {
+                    $beforeChar = ($i > 0) ? $sql[$i-1] : ' ';
+                    $afterChar = ($i + 4 < $length) ? $sql[$i + 4] : ' ';
+                    if (!ctype_alnum($beforeChar) && !ctype_alnum($afterChar)) {
+                        $caseCount++;
+                        $i += 4;
+                        continue;
+                    }
+                }
+                
+                // Check for END keyword (word boundary check)
+                if ($i + 3 <= $length && strtoupper(substr($sql, $i, 3)) === 'END') {
+                    $beforeChar = ($i > 0) ? $sql[$i-1] : ' ';
+                    $afterChar = ($i + 3 < $length) ? $sql[$i + 3] : ' ';
+                    if (!ctype_alnum($beforeChar) && !ctype_alnum($afterChar)) {
+                        $caseCount--;
+                        if ($caseCount === 0) {
+                            return $i; // Found matching END
+                        }
+                        $i += 3;
+                        continue;
+                    }
+                }
+            }
+            
+            $i++;
+        }
+        
+        return false; // No matching END found
+    }
+
+    private function formatSingleCaseStatement(string $caseBlock): string {
+        $caseBlock = trim($caseBlock);
+        
+        // Check if this is a simple CASE or searched CASE
+        $isSimpleCase = $this->isSimpleCaseStatement($caseBlock);
+        
+        // Extract components
+        $components = $this->parseCaseComponents($caseBlock, $isSimpleCase);
+        
+        if (empty($components)) {
+            return $caseBlock; // Return original if parsing fails
+        }
+        
+        // Build formatted CASE statement
+        $result = "CASE";
+        
+        // Add expression for simple CASE
+        if ($isSimpleCase && !empty($components['expression'])) {
+            $result .= " " . trim($components['expression']);
+        }
+        
+        // Add WHEN clauses
+        foreach ($components['when_clauses'] as $whenClause) {
+            $condition = $whenClause['condition'];
+            $thenResult = $whenClause['result'];
+            
+            // Check if the THEN result contains a nested CASE statement
+            if (preg_match('/\bCASE\b.*?\bEND\b/i', $thenResult)) {
+                // Format nested CASE with extra indentation
+                $nestedCase = $this->formatCaseStatements($thenResult);
+                // Add extra indentation to each line of the nested CASE
+                $lines = explode("\n", $nestedCase);
+                $indentedLines = [];
+                foreach ($lines as $line) {
+                    if (trim($line) !== '') {
+                        $indentedLines[] = $this->indentation . $this->indentation . trim($line);
+                    }
+                }
+                $thenResult = "\n" . implode("\n", $indentedLines);
+                $result .= "\n" . $this->indentation . "WHEN " . $condition . " THEN" . $thenResult;
+            } else {
+                // Regular THEN result
+                $result .= "\n" . $this->indentation . "WHEN " . $condition . " THEN " . $thenResult;
+            }
+        }
+        
+        // Add ELSE clause if present
+        if (!empty($components['else_clause'])) {
+            $elseClause = $components['else_clause'];
+            
+            // Check if ELSE contains nested CASE
+            if (preg_match('/\bCASE\b.*?\bEND\b/i', $elseClause)) {
+                $nestedCase = $this->formatCaseStatements($elseClause);
+                $lines = explode("\n", $nestedCase);
+                $indentedLines = [];
+                foreach ($lines as $line) {
+                    if (trim($line) !== '') {
+                        $indentedLines[] = $this->indentation . $this->indentation . trim($line);
+                    }
+                }
+                $elseClause = "\n" . implode("\n", $indentedLines);
+                $result .= "\n" . $this->indentation . "ELSE" . $elseClause;
+            } else {
+                $result .= "\n" . $this->indentation . "ELSE " . $elseClause;
+            }
+        }
+        
+        // Add END
+        $result .= "\nEND";
+        
+        return $result;
+    }
+
+    private function isSimpleCaseStatement(string $caseBlock): bool {
+        // Remove CASE and END keywords
+        $content = preg_replace('/^\s*CASE\s+/i', '', $caseBlock);
+        $content = preg_replace('/\s+END\s*$/i', '', $content);
+        
+        // Look for the pattern: expression WHEN value THEN result
+        // If first WHEN doesn't start with a comparison operator, it's likely a simple CASE
+        if (preg_match('/^([^W]+?)\s+WHEN\s+([^T]+?)\s+THEN/i', $content, $matches)) {
+            $possibleExpression = trim($matches[1]);
+            $whenValue = trim($matches[2]);
+            
+            // If the WHEN value doesn't contain comparison operators, it's likely simple CASE
+            if (!preg_match('/[<>=!]|IS\s+NULL|IS\s+NOT\s+NULL|LIKE|IN\s*\(|EXISTS|BETWEEN/i', $whenValue)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private function parseCaseComponents(string $caseBlock, bool $isSimpleCase): array {
+        $components = [
+            'expression' => '',
+            'when_clauses' => [],
+            'else_clause' => ''
+        ];
+        
+        // Remove CASE and END keywords
+        $content = preg_replace('/^\s*CASE\s+/i', '', $caseBlock);
+        $content = preg_replace('/\s+END\s*$/i', '', $content);
+        
+        // Extract expression for simple CASE
+        if ($isSimpleCase) {
+            if (preg_match('/^([^W]+?)\s+(?=WHEN)/i', $content, $matches)) {
+                $components['expression'] = trim($matches[1]);
+                $content = preg_replace('/^[^W]+?\s+(?=WHEN)/i', '', $content);
+            }
+        }
+        
+        // Extract ELSE clause first (if present)
+        if (preg_match('/\bELSE\s+(.*?)$/is', $content, $elseMatches)) {
+            $components['else_clause'] = trim($elseMatches[1]);
+            $content = preg_replace('/\bELSE\s+.*$/is', '', $content);
+        }
+        
+        // Extract WHEN/THEN clauses
+        $whenClauses = $this->extractWhenClauses($content);
+        $components['when_clauses'] = $whenClauses;
+        
+        return $components;
+    }
+
+    private function extractWhenClauses(string $content): array {
+        $whenClauses = [];
+        $content = trim($content);
+        
+        if (empty($content)) {
+            return $whenClauses;
+        }
+        
+        // Use a more robust approach to split WHEN clauses
+        $i = 0;
+        $length = strlen($content);
+        
+        while ($i < $length) {
+            // Find next WHEN
+            $whenPos = $this->findNextKeyword($content, 'WHEN', $i);
+            if ($whenPos === false) {
+                break;
+            }
+            
+            // Find the THEN for this WHEN
+            $thenPos = $this->findNextKeyword($content, 'THEN', $whenPos + 4);
+            if ($thenPos === false) {
+                break;
+            }
+            
+            // Extract condition (between WHEN and THEN)
+            $condition = trim(substr($content, $whenPos + 4, $thenPos - $whenPos - 4));
+            
+            // Find the end of the THEN value (next WHEN, ELSE, or end of string)
+            $nextWhenPos = $this->findNextKeyword($content, 'WHEN', $thenPos + 4);
+            $elsePos = $this->findNextKeyword($content, 'ELSE', $thenPos + 4);
+            
+            // Determine the end position
+            $endPos = $length;
+            if ($nextWhenPos !== false && $elsePos !== false) {
+                $endPos = min($nextWhenPos, $elsePos);
+            } elseif ($nextWhenPos !== false) {
+                $endPos = $nextWhenPos;
+            } elseif ($elsePos !== false) {
+                $endPos = $elsePos;
+            }
+            
+            // Extract result (between THEN and end position)
+            $result = trim(substr($content, $thenPos + 4, $endPos - $thenPos - 4));
+            
+            $whenClauses[] = [
+                'condition' => $condition,
+                'result' => $result
+            ];
+            
+            $i = $endPos;
+        }
+        
+        return $whenClauses;
+    }
+
+    private function findNextWhenPosition(string $text) {
+        // Look for WHEN that's not inside parentheses or quotes
+        $parenCount = 0;
+        $inQuote = false;
+        $quoteChar = '';
+        $length = strlen($text);
+        
+        for ($i = 0; $i < $length - 3; $i++) {
+            $char = $text[$i];
+            
+            // Handle quotes
+            if (!$inQuote && ($char === "'" || $char === '"')) {
+                $inQuote = true;
+                $quoteChar = $char;
+            } elseif ($inQuote && $char === $quoteChar && ($i === 0 || $text[$i-1] !== '\\')) {
+                $inQuote = false;
+                $quoteChar = '';
+            }
+            
+            if (!$inQuote) {
+                // Handle parentheses
+                if ($char === '(') {
+                    $parenCount++;
+                } elseif ($char === ')') {
+                    $parenCount--;
+                }
+                
+                // Look for WHEN at top level
+                if ($parenCount === 0) {
+                    $remaining = substr($text, $i);
+                    if (preg_match('/^WHEN\s+/i', $remaining)) {
+                        return $i;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    private function findNextKeyword(string $text, string $keyword, int $startPos = 0) {
+        $length = strlen($text);
+        $keywordLen = strlen($keyword);
+        $inQuote = false;
+        $quoteChar = '';
+        $parenCount = 0;
+        $caseCount = 0;
+        
+        for ($i = $startPos; $i <= $length - $keywordLen; $i++) {
+            $char = $text[$i];
+            
+            // Handle quotes
+            if (!$inQuote && ($char === "'" || $char === '"')) {
+                $inQuote = true;
+                $quoteChar = $char;
+            } elseif ($inQuote && $char === $quoteChar && ($i === 0 || $text[$i-1] !== '\\')) {
+                $inQuote = false;
+                $quoteChar = '';
+            }
+            
+            if (!$inQuote) {
+                // Handle parentheses
+                if ($char === '(') {
+                    $parenCount++;
+                } elseif ($char === ')') {
+                    $parenCount--;
+                }
+                
+                // Handle nested CASE statements - only count at same nesting level
+                if ($i + 4 <= $length && strtoupper(substr($text, $i, 4)) === 'CASE') {
+                    $beforeChar = ($i > 0) ? $text[$i-1] : ' ';
+                    $afterChar = ($i + 4 < $length) ? $text[$i + 4] : ' ';
+                    if (!ctype_alnum($beforeChar) && !ctype_alnum($afterChar)) {
+                        $caseCount++;
+                    }
+                } elseif ($i + 3 <= $length && strtoupper(substr($text, $i, 3)) === 'END') {
+                    $beforeChar = ($i > 0) ? $text[$i-1] : ' ';
+                    $afterChar = ($i + 3 < $length) ? $text[$i + 3] : ' ';
+                    if (!ctype_alnum($beforeChar) && !ctype_alnum($afterChar)) {
+                        $caseCount--;
+                    }
+                }
+                
+                // Look for keyword only at top level
+                if ($parenCount === 0 && $caseCount === 0) {
+                    $potentialKeyword = strtoupper(substr($text, $i, $keywordLen));
+                    if ($potentialKeyword === strtoupper($keyword)) {
+                        // Check word boundaries
+                        $beforeChar = ($i > 0) ? $text[$i - 1] : ' ';
+                        $afterChar = ($i + $keywordLen < $length) ? $text[$i + $keywordLen] : ' ';
+                        
+                        if (!ctype_alnum($beforeChar) && $beforeChar !== '_' && 
+                            !ctype_alnum($afterChar) && $afterChar !== '_') {
+                            return $i;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
     }
 
     // PHASE 1 IMPROVEMENT: Enhanced WHERE clause formatting
@@ -998,11 +1553,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('X-Frame-Options: DENY');
         header('X-XSS-Protection: 1; mode=block');
         
-        // Validate CSRF token if implemented
-        // if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
-        //     throw new RuntimeException('Invalid CSRF token');
-        // }
-        
         if (!isset($_POST['input-query']) || empty(trim($_POST['input-query']))) {
             throw new InvalidArgumentException('Input query is required');
         }
@@ -1019,7 +1569,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
     } catch (Exception $e) {
         http_response_code(400);
-        // Provide generic error message for security
         echo 'Error processing request: ' . $e->getMessage();
     }
 }
+?>
