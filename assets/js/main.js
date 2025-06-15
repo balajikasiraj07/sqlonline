@@ -1,262 +1,211 @@
 /*
-	Editorial by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+	Simplified main.js for SQL Formatter
+	Removed jQuery dependencies and unnecessary features
 */
 
-(function($) {
+(function() {
+	'use strict';
 
-	var	$window = $(window),
-		$head = $('head'),
-		$body = $('body');
-
-	// Breakpoints.
-		breakpoints({
-			xlarge:   [ '1281px',  '1680px' ],
-			large:    [ '981px',   '1280px' ],
-			medium:   [ '737px',   '980px'  ],
-			small:    [ '481px',   '736px'  ],
-			xsmall:   [ '361px',   '480px'  ],
-			xxsmall:  [ null,      '360px'  ],
-			'xlarge-to-max':    '(min-width: 1681px)',
-			'small-to-xlarge':  '(min-width: 481px) and (max-width: 1680px)'
+	// Wait for DOM to be ready
+	document.addEventListener('DOMContentLoaded', function() {
+		
+		// Remove preload class after page loads
+		window.addEventListener('load', function() {
+			setTimeout(function() {
+				document.body.classList.remove('is-preload');
+			}, 100);
 		});
 
-	// Stops animations/transitions until the page has ...
+		// Handle window resize events with debouncing
+		let resizeTimeout;
+		window.addEventListener('resize', function() {
+			// Mark as resizing
+			document.body.classList.add('is-resizing');
 
-		// ... loaded.
-			$window.on('load', function() {
-				window.setTimeout(function() {
-					$body.removeClass('is-preload');
-				}, 100);
+			// Remove after delay
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout(function() {
+				document.body.classList.remove('is-resizing');
+			}, 100);
+		});
+
+		// Mobile menu functionality (if needed)
+		const menuToggle = document.querySelector('.menu-toggle');
+		const navigation = document.querySelector('.navigation');
+		
+		if (menuToggle && navigation) {
+			menuToggle.addEventListener('click', function(e) {
+				e.preventDefault();
+				navigation.classList.toggle('active');
+			});
+		}
+
+		// Smooth scroll for anchor links (if any)
+		document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+			anchor.addEventListener('click', function(e) {
+				const targetId = this.getAttribute('href');
+				if (targetId === '#') return;
+				
+				const targetElement = document.querySelector(targetId);
+				if (targetElement) {
+					e.preventDefault();
+					targetElement.scrollIntoView({
+						behavior: 'smooth',
+						block: 'start'
+					});
+				}
+			});
+		});
+
+		// Focus on input textarea when page loads
+		const inputArea = document.getElementById('input-area');
+		if (inputArea) {
+			inputArea.focus();
+		}
+
+		// Add active class to current navigation item (if you have navigation)
+		const currentLocation = location.pathname;
+		const navLinks = document.querySelectorAll('nav a');
+		navLinks.forEach(link => {
+			if (link.getAttribute('href') === currentLocation) {
+				link.classList.add('active');
+			}
+		});
+
+		// Handle escape key to clear textareas
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') {
+				const activeElement = document.activeElement;
+				if (activeElement && activeElement.tagName === 'TEXTAREA') {
+					// Optional: Ask for confirmation before clearing
+					if (activeElement.value && activeElement.value.trim()) {
+						if (confirm('Clear the current text?')) {
+							activeElement.value = '';
+							activeElement.focus();
+						}
+					}
+				}
+			}
+		});
+
+		// Auto-resize textareas (optional enhancement)
+		const textareas = document.querySelectorAll('textarea');
+		textareas.forEach(textarea => {
+			// Set initial height
+			adjustTextareaHeight(textarea);
+			
+			// Adjust on input
+			textarea.addEventListener('input', function() {
+				adjustTextareaHeight(this);
+			});
+		});
+
+		function adjustTextareaHeight(textarea) {
+			// Reset height to auto to get the correct scrollHeight
+			textarea.style.height = 'auto';
+			// Set the height to match content (with a max height)
+			const maxHeight = 500; // Maximum height in pixels
+			const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+			textarea.style.height = newHeight + 'px';
+		}
+
+		// Simple notification system for copy success (works with copy-button.js)
+		window.showNotification = function(message, type = 'success') {
+			const notification = document.createElement('div');
+			notification.className = `notification ${type}`;
+			notification.textContent = message;
+			document.body.appendChild(notification);
+
+			// Show notification
+			setTimeout(() => notification.classList.add('show'), 100);
+
+			// Hide and remove after 3 seconds
+			setTimeout(() => {
+				notification.classList.remove('show');
+				setTimeout(() => notification.remove(), 300);
+			}, 3000);
+		};
+
+		// Performance: Lazy load images if any
+		const images = document.querySelectorAll('img[data-src]');
+		if ('IntersectionObserver' in window) {
+			const imageObserver = new IntersectionObserver((entries, observer) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						const img = entry.target;
+						img.src = img.dataset.src;
+						img.removeAttribute('data-src');
+						imageObserver.unobserve(img);
+					}
+				});
 			});
 
-		// ... stopped resizing.
-			var resizeTimeout;
-
-			$window.on('resize', function() {
-
-				// Mark as resizing.
-					$body.addClass('is-resizing');
-
-				// Unmark after delay.
-					clearTimeout(resizeTimeout);
-
-					resizeTimeout = setTimeout(function() {
-						$body.removeClass('is-resizing');
-					}, 100);
-
+			images.forEach(img => imageObserver.observe(img));
+		} else {
+			// Fallback for older browsers
+			images.forEach(img => {
+				img.src = img.dataset.src;
+				img.removeAttribute('data-src');
 			});
+		}
 
-	// Fixes.
+		// Print functionality for formatted SQL
+		window.printFormattedSQL = function() {
+			const outputArea = document.getElementById('output-area');
+			if (outputArea && outputArea.value) {
+				const printWindow = window.open('', '_blank');
+				printWindow.document.write(`
+					<html>
+						<head>
+							<title>Formatted SQL Query</title>
+							<style>
+								body { font-family: 'Courier New', monospace; white-space: pre-wrap; padding: 20px; }
+							</style>
+						</head>
+						<body>${outputArea.value}</body>
+					</html>
+				`);
+				printWindow.document.close();
+				printWindow.print();
+			}
+		};
 
-		// Object fit images.
-			if (!browser.canUse('object-fit')
-			||	browser.name == 'safari')
-				$('.image.object').each(function() {
+		// Keyboard shortcuts
+		document.addEventListener('keydown', function(e) {
+			// Ctrl/Cmd + Enter to format
+			if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+				e.preventDefault();
+				const formatButton = document.getElementById('convert-button');
+				if (formatButton) formatButton.click();
+			}
+			
+			// Ctrl/Cmd + Shift + C to copy
+			if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+				e.preventDefault();
+				const copyButton = document.getElementById('copy-button');
+				if (copyButton) copyButton.click();
+			}
+		});
 
-					var $this = $(this),
-						$img = $this.children('img');
+		// Theme toggle (if you want to add dark mode)
+		const themeToggle = document.querySelector('.theme-toggle');
+		if (themeToggle) {
+			// Check for saved theme preference or default to 'light'
+			const currentTheme = localStorage.getItem('theme') || 'light';
+			document.documentElement.setAttribute('data-theme', currentTheme);
 
-					// Hide original image.
-						$img.css('opacity', '0');
-
-					// Set background.
-						$this
-							.css('background-image', 'url("' + $img.attr('src') + '")')
-							.css('background-size', $img.css('object-fit') ? $img.css('object-fit') : 'cover')
-							.css('background-position', $img.css('object-position') ? $img.css('object-position') : 'center');
-
-				});
-
-	// Sidebar.
-		var $sidebar = $('#sidebar'),
-			$sidebar_inner = $sidebar.children('.inner');
-
-		// Inactive by default on <= large.
-			breakpoints.on('<=large', function() {
-				$sidebar.addClass('inactive');
+			themeToggle.addEventListener('click', function() {
+				const theme = document.documentElement.getAttribute('data-theme');
+				const newTheme = theme === 'light' ? 'dark' : 'light';
+				
+				document.documentElement.setAttribute('data-theme', newTheme);
+				localStorage.setItem('theme', newTheme);
 			});
+		}
 
-			breakpoints.on('>large', function() {
-				$sidebar.removeClass('inactive');
-			});
+		// Console message
+		console.log('%cSQL Formatter Online', 'color: #f56a6a; font-size: 20px; font-weight: bold;');
+		console.log('Format your SQL queries with ease!');
+	});
 
-		// Hack: Workaround for Chrome/Android scrollbar position bug.
-			if (browser.os == 'android'
-			&&	browser.name == 'chrome')
-				$('<style>#sidebar .inner::-webkit-scrollbar { display: none; }</style>')
-					.appendTo($head);
-
-		// Toggle.
-			$('<a href="#sidebar" class="toggle">Toggle</a>')
-				.appendTo($sidebar)
-				.on('click', function(event) {
-
-					// Prevent default.
-						event.preventDefault();
-						event.stopPropagation();
-
-					// Toggle.
-						$sidebar.toggleClass('inactive');
-
-				});
-
-		// Events.
-
-			// Link clicks.
-				$sidebar.on('click', 'a', function(event) {
-
-					// >large? Bail.
-						if (breakpoints.active('>large'))
-							return;
-
-					// Vars.
-						var $a = $(this),
-							href = $a.attr('href'),
-							target = $a.attr('target');
-
-					// Prevent default.
-						event.preventDefault();
-						event.stopPropagation();
-
-					// Check URL.
-						if (!href || href == '#' || href == '')
-							return;
-
-					// Hide sidebar.
-						$sidebar.addClass('inactive');
-
-					// Redirect to href.
-						setTimeout(function() {
-
-							if (target == '_blank')
-								window.open(href);
-							else
-								window.location.href = href;
-
-						}, 500);
-
-				});
-
-			// Prevent certain events inside the panel from bubbling.
-				$sidebar.on('click touchend touchstart touchmove', function(event) {
-
-					// >large? Bail.
-						if (breakpoints.active('>large'))
-							return;
-
-					// Prevent propagation.
-						event.stopPropagation();
-
-				});
-
-			// Hide panel on body click/tap.
-				$body.on('click touchend', function(event) {
-
-					// >large? Bail.
-						if (breakpoints.active('>large'))
-							return;
-
-					// Deactivate.
-						$sidebar.addClass('inactive');
-
-				});
-
-		// Scroll lock.
-		// Note: If you do anything to change the height of the sidebar's content, be sure to
-		// trigger 'resize.sidebar-lock' on $window so stuff doesn't get out of sync.
-
-			$window.on('load.sidebar-lock', function() {
-
-				var sh, wh, st;
-
-				// Reset scroll position to 0 if it's 1.
-					if ($window.scrollTop() == 1)
-						$window.scrollTop(0);
-
-				$window
-					.on('scroll.sidebar-lock', function() {
-
-						var x, y;
-
-						// <=large? Bail.
-							if (breakpoints.active('<=large')) {
-
-								$sidebar_inner
-									.data('locked', 0)
-									.css('position', '')
-									.css('top', '');
-
-								return;
-
-							}
-
-						// Calculate positions.
-							x = Math.max(sh - wh, 0);
-							y = Math.max(0, $window.scrollTop() - x);
-
-						// Lock/unlock.
-							if ($sidebar_inner.data('locked') == 1) {
-
-								if (y <= 0)
-									$sidebar_inner
-										.data('locked', 0)
-										.css('position', '')
-										.css('top', '');
-								else
-									$sidebar_inner
-										.css('top', -1 * x);
-
-							}
-							else {
-
-								if (y > 0)
-									$sidebar_inner
-										.data('locked', 1)
-										.css('position', 'fixed')
-										.css('top', -1 * x);
-
-							}
-
-					})
-					.on('resize.sidebar-lock', function() {
-
-						// Calculate heights.
-							wh = $window.height();
-							sh = $sidebar_inner.outerHeight() + 30;
-
-						// Trigger scroll.
-							$window.trigger('scroll.sidebar-lock');
-
-					})
-					.trigger('resize.sidebar-lock');
-
-				});
-
-	// Menu.
-		var $menu = $('#menu'),
-			$menu_openers = $menu.children('ul').find('.opener');
-
-		// Openers.
-			$menu_openers.each(function() {
-
-				var $this = $(this);
-
-				$this.on('click', function(event) {
-
-					// Prevent default.
-						event.preventDefault();
-
-					// Toggle.
-						$menu_openers.not($this).removeClass('active');
-						$this.toggleClass('active');
-
-					// Trigger resize (sidebar lock).
-						$window.triggerHandler('resize.sidebar-lock');
-
-				});
-
-			});
-
-})(jQuery);
+})();
