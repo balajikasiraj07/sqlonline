@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
@@ -86,212 +86,407 @@
 </script>
 			
 	</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="#" class="logo">SQLOnline.in</a>
+            <ul class="nav-links">
+                <li><a href="#formatter">Formatter</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#tutorials">Tutorials</a></li>
+                <li><a href="#blog">Blog</a></li>
+            </ul>
+        </div>
+    </nav>
 
-	<body class="is-preload">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-badge">
+                <span class="badge-icon">✨</span>
+                <span>Professional SQL Formatter</span>
+                <span class="badge-accent">Free</span>
+            </div>
+            <h1 class="hero-title">
+                SQLOnline.in - <span class="title-gradient">Format SQL Code Online</span>
+            </h1>
+            <p class="hero-subtitle">
+                Free online SQL formatter and beautifier tool. Clean, format and beautify your SQL queries instantly. Supports MySQL, PostgreSQL, SQL Server, Oracle and more.
+            </p>
+            <div class="hero-features">
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <span>Instant Formatting</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔧</div>
+                    <span>All SQL Dialects</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📋</div>
+                    <span>Copy & Paste</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-		<!-- Wrapper -->
-			<div id="wrapper">
+    <!-- SQL Formatter Tool -->
+    <section class="formatter-section" id="formatter">
+        <div class="formatter-container">
+            <div class="formatter-tool">
+                <div class="formatter-header">
+                    <h2 class="formatter-title">SQL Code Beautifier</h2>
+                    <p class="formatter-description">
+                        Paste your SQL code below and instantly get beautifully formatted, readable SQL
+                    </p>
+                </div>
+                <div class="formatter-body">
+                    <div class="input-section">
+                        <div class="section-header">
+                            <h3 class="section-title">input.sql</h3>
+                            <button class="format-btn" onclick="formatSQL()">Format</button>
+                        </div>
+                        <div class="code-area">
+                            <textarea 
+                                class="code-input" 
+                                id="sqlInput"
+                                placeholder="// Enter your SQL code here...
 
-				<!-- Main -->
-					<div id="main">
-						
-						<div class="inner">
+SELECT users.name, orders.total, products.name FROM users JOIN orders ON users.id = orders.user_id JOIN order_items ON orders.id = order_items.order_id JOIN products ON order_items.product_id = products.id WHERE orders.created_at >= '2024-01-01' AND orders.status = 'completed' ORDER BY orders.total DESC LIMIT 10;"
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div class="output-section">
+                        <div class="section-header">
+                            <h3 class="section-title">output.sql</h3>
+                            <button class="format-btn" onclick="copyToClipboard()">Copy</button>
+                        </div>
+                        <div class="code-area">
+                            <textarea 
+                                class="code-output" 
+                                id="sqlOutput"
+                                readonly
+                                placeholder="// Formatted SQL will appear here..."
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-							<!-- Header -->
-								<header id="header">
-									<a href="https://sqlonline.in/" class="logo"><strong>SQL Online</strong> by Balaji Kasiraj</a>
-									
-								</header>
-								<div class="container">
-									<h1>SQL Formatter Online - Format Any SQL Query with One Click</h1>
-									<p>Use this tool to format and beautify your queries for better readability and performance.</p>
-									
-									<form id="sql-form" action="process.php" method="post">
-										<div class="box-container">
-											<div class="box">
-												<label for="input-area">Enter SQL query here:</label>
-												<textarea id="input-area" name="input-query" placeholder="Enter SQL query here"></textarea>
-												<div style="text-align: right; margin-top: 8px;">
-													<button type="button" id="convert-button">Format Query</button>
-												</div>
-											</div>
-											<div class="box">
-												<label for="output-area">Formatted SQL query:</label>
-												<textarea id="output-area" placeholder="Formatted SQL query" readonly></textarea>
-												<div style="text-align: right; margin-top: 8px;">
-													<button type="button" id="copy-button">📋 Copy SQL</button>
-													<button type="button" id="validate-button" style="margin-left: 10px;">Validate Query</button>
-												</div>
-											</div>
-										</div>	
-									</form>
-								</div>
-								
-								<div class="text-box">
-									<h2>Transform Your SQL Code with Our Free SQL Beautifier</h2>
-									<p>Are you tired of messy SQL code? Enhance your productivity and code readability with our state-of-the-art SQL Beautifier. 
-										Perfect for professional and college students practicing DBMS and SQL, as well as anyone involved in analytics, 
-										root cause analysis, and various SQL versions.</p>
-									
-									<h3>Key Features:</h3>
-									<ul>
-										<li>Clean, Readable Code: Automatically format your SQL code to make it cleaner and easier to read.</li>
-										<li>Enhanced Productivity: Spend less time formatting and more time solving complex queries.</li>
-										<li>Supports Multiple SQL Versions: Compatible with different SQL dialects to suit your needs.</li>
-									</ul>
-									
-									<h3>Why Choose Our SQL Beautifier?</h3>
-									<ul>
-										<li>Built by an Analyst for the Analytics Community: Our tool is designed with deep understanding and expertise in the field.</li>
-										<li>User-Friendly Interface: Enjoy a simple and intuitive design for effortless formatting.</li>
-										<li>Customizable Settings: Tailor the formatting options to your specific requirements.</li>
-										<li>Instant Results: Get beautifully formatted SQL code in seconds with just a few clicks.</li>
-									</ul>
-									
-									<p>Whether you're a student mastering SQL or a professional seeking efficient code management, 
-										our SQL Beautifier is your go-to tool. Start formatting your SQL code today and experience the difference!</p>
-									
-									<h3>Benefits:</h3>
-									<ul>
-										<li>Boost Your Efficiency: By using our SQL Formatter, you'll save time and increase your coding efficiency.</li>
-										<li>Improve Code Quality: Clean, readable code enhances understanding and collaboration within teams.</li>
-										<li>Stay Organized: Well-formatted SQL code helps in maintaining and updating databases effectively.</li>
-									</ul>
-									
-									<p>Take your SQL skills to the next level with our powerful SQL Beautifier. 
-										Join the community of students and professionals who trust our tool for their database management needs.</p>
-								</div>
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="about-container">
+            <div class="about-content">
+                <div class="about-badge">
+                    <span class="badge-icon">👋</span>
+                    <span>Meet the Creator</span>
+                </div>
+                <h2 class="about-title">Built by an analyst for the analytics community</h2>
+                <p class="about-description">
+                    Hi, I'm Balaji Kasiraj, a Product and Business Analyst with 6+ years of invaluable experience. When I found myself facing a career transition after being laid off, I saw it as an opportunity to share my expertise and knowledge with the world. That's when I embarked on an exciting journey as a YouTube educator, where I passionately teach various aspects of Product and Business Analysis.
+                </p>
+                <div class="about-stats">
+                    <div class="stat">
+                        <span class="stat-number">6+</span>
+                        <span class="stat-label">Years Experience</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">50K+</span>
+                        <span class="stat-label">YouTube Views</span>
+                    </div>
+                </div>
+                <div class="about-links">
+                    <a href="https://linkedin.com/in/balajikasiraj" class="social-btn linkedin" target="_blank">
+                        <span class="btn-icon">💼</span>
+                        <span>Connect on LinkedIn</span>
+                    </a>
+                    <a href="https://youtube.com/@BalajiKasiraj" class="social-btn youtube" target="_blank">
+                        <span class="btn-icon">📺</span>
+                        <span>Subscribe on YouTube</span>
+                    </a>
+                </div>
+            </div>
+            <div class="about-image">
+                <div class="profile-card">
+                    <img src="images/Profile-Pic.avif" alt="Balaji Kasiraj - SQL and Analytics Expert" class="profile-img">
+                    <div class="profile-info">
+                        <h3 class="profile-name">Balaji Kasiraj</h3>
+                        <p class="profile-role">Business/Product Analyst & SQL Expert</p>
+                        <div class="profile-specialties">
+                            <span class="specialty-tag">Business Analysis</span>
+                            <span class="specialty-tag">Data Analytics</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-							<!-- Banner -->
-								<section id="banner">
-									<div class="content">
-										<header>
-											<h2>Hi, I’m Balaji</h2>
-											<p>Business/Product Analyst</p>
-										</header>
-										<p>Greetings! </br> I am Balaji, a Product and Business Analyst with 6 years of invaluable experience. When I found myself facing a career transition after being laid off, I saw it as an opportunity to share my expertise and knowledge with the world. That's when I embarked on an exciting journey as a YouTube educator, where I passionately teach various aspects of Product and Business Analysis. </p>
-										<div class="g-ytsubscribe" data-channelid="UCqYQw1g5z_4E3-h3cPkRXKg" data-layout="full" data-count="default"></div>
-									</div>
-									<span class="image object">
-										<img src="images/Profile-Pic.avif" alt="Balaji Kasiraj - SQL and Analytics Expert" loading="lazy" width="500" height="400" fetchpriority="low"/>
-									</span>
-								</section>
-								
-								<header class="article-header">
-									<div class="article-container">
-										<h1>Featured Articles</h1>
-									</div>
-								</header>
+    <!-- Popular Content Section -->
+    <section class="content" id="tutorials">
+        <div class="content-container">
+            <div class="content-header">
+                <h2 class="section-title-large">Popular SQL Tutorials</h2>
+                <p class="section-subtitle">Learn SQL with real-world examples and advanced techniques</p>
+            </div>
+            <div class="content-grid">
+                <div class="content-card">
+                    <div class="video-container">
+                        <iframe width="100%" height="200" src="https://www.youtube.com/embed/EZrWqAghZuo" title="Customer Retention SQL" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Customer Retention Analysis with SQL</h3>
+                        <p class="card-description">
+                            Learn advanced SQL techniques for customer retention analysis using real-world data examples and complex queries.
+                        </p>
+                        <a href="https://www.youtube.com/watch?v=EZrWqAghZuo" class="card-link" target="_blank">
+                            Watch on YouTube →
+                        </a>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="video-container">
+                        <iframe width="100%" height="200" src="https://www.youtube.com/embed/4v8VReN5_Q8" title="Root Cause Analysis" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Mastering Root Cause Analysis</h3>
+                        <p class="card-description">
+                            Complete methodology for root cause analysis with practical examples, templates, and business intelligence techniques.
+                        </p>
+                        <a href="https://youtu.be/4v8VReN5_Q8" class="card-link" target="_blank">
+                            Watch on YouTube →
+                        </a>
+                    </div>
+                </div>
+                <div class="content-card">
+                    <div class="video-container">
+                        <iframe width="100%" height="200" src="https://www.youtube.com/embed/i-_ZI4TYENs" title="Longest Winning Streak SQL" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Advanced SQL Challenge - Longest Winning Streak</h3>
+                        <p class="card-description">
+                            Solve complex SQL problems with advanced window functions, analytical thinking, and step-by-step problem solving.
+                        </p>
+                        <a href="https://youtu.be/i-_ZI4TYENs" class="card-link" target="_blank">
+                            Watch on YouTube →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-								<main class="article-main">
-									<div class="article-container">
-										<section class="article-summaries">
-											<article class="article-summary">
-												<div class="article-image">
-													<a href="OrderOfExecutionSQL.html" aria-label="How does a Query Execute?" target="_blank" class="image"></a><img src="images/Blog 1/Article Pic.webp" alt="Order of Execution SQL">
-												</div>
-												<div class="article-content">
-													<h2>SQL - Order of Execution</h2>
-													<p>How does SQL Execute the Query?</p>
-													<a href="OrderOfExecutionSQL.html">Click to Read the Article</a>
-												</div>
-											</article>
-											 <article class="article-summary">
-												<div class="article-image">
-													<a href="OptimisedQueryWriting.html" aria-label="Write Optimised Queries" target="_blank" class="image"></a><img src="images/QueryOptimization/improve-SQL-query-performance.webp" alt="Writing Optimised SQL Queries">
-													<img src="" alt="">
-												</div>
-												<div class="article-content">
-													<h2>Optimised Query Writing</h2>
-													<p>How fast can you read 100 Billion records of data?</p>
-													<a href="OptimisedQueryWriting.html">Click to Read the Article</a>
-												</div>
-											</article>
-											<article class="article-summary">
-												<div class="article-image">
-													<a href="CommonSQLMisconception.html" aria-label="CTEs: Addressing a Common SQL Misconception" target="_blank" class="image"></a><img src="images/RAM Optimisation/meme.webp" alt="CTEs: Addressing a Common SQL Misconception">
-													<img src="" alt="">
-												</div>
-												<div class="article-content">
-													<h2>CTEs: Addressing a Common SQL Misconception</h2>
-													<p>Why using CTEs in a query are inefficient?</p>
-													<a href="CommonSQLMisconception.html">Click to Read the Article</a>
-												</div>
-											</article>
-											<!--<article class="article-summary">
-												<div class="article-image">
-													<img src="https://via.placeholder.com/150" alt="Article Image">
-												</div>
-												<div class="article-content">
-													<h2>Article Title 3</h2>
-													<p>Summary of the article content goes here. This is a brief introduction to the article to entice readers to click through and read more.</p>
-													<a href="#">Read More</a>
-												</div>
-											</article> -->
-											<!-- Add more articles as needed -->
-										</section>
-									</div>
-								</main>
+    <!-- Blog Posts Section -->
+    <section class="blog" id="blog">
+        <div class="blog-container">
+            <div class="blog-header">
+                <h2 class="section-title-large">Latest Blog Posts</h2>
+                <p class="section-subtitle">Deep dives into SQL techniques, analytics insights, and industry best practices</p>
+            </div>
+            <div class="blog-grid">
+                <article class="blog-card">
+                    <div class="blog-meta">
+                        <span class="blog-category">SQL Fundamentals</span>
+                        <span class="blog-date">July 2024</span>
+                    </div>
+                    <h3 class="blog-title">Understanding SQL Query Execution Order</h3>
+                    <p class="blog-excerpt">
+                        Did you always think that the SELECT statement gets executed first? Learn the actual order of SQL query execution and how the interpreter optimizes your queries.
+                    </p>
+                    <div class="blog-stats">
+                        <span class="stat-item">📖 4 min read</span>
+                        <span class="stat-item">👀 3.2k views</span>
+                    </div>
+                    <a href="OrderOfExecutionSQL.html" class="blog-link">Read Article →</a>
+                </article>
+                
+                <article class="blog-card">
+                    <div class="blog-meta">
+                        <span class="blog-category">Query Optimization</span>
+                        <span class="blog-date">July 2024</span>
+                    </div>
+                    <h3 class="blog-title">How Fast Can You Read 100 Billion Records?</h3>
+                    <p class="blog-excerpt">
+                        Companies like Amazon, Meta, and Google process billions of records daily. Learn optimization techniques including table partitioning to handle massive datasets efficiently.
+                    </p>
+                    <div class="blog-stats">
+                        <span class="stat-item">📖 7 min read</span>
+                        <span class="stat-item">👀 4.8k views</span>
+                    </div>
+                    <a href="OptimisedQueryWriting.html" class="blog-link">Read Article →</a>
+                </article>
+                
+                <article class="blog-card">
+                    <div class="blog-meta">
+                        <span class="blog-category">SQL Performance</span>
+                        <span class="blog-date">August 2024</span>
+                    </div>
+                    <h3 class="blog-title">CTEs: The RAM-Hogging Culprits in Your Queries</h3>
+                    <p class="blog-excerpt">
+                        Common Table Expressions are widely used but there's a prevalent misconception about their memory handling. Learn why CTEs can be inefficient in your queries.
+                    </p>
+                    <div class="blog-stats">
+                        <span class="stat-item">📖 5 min read</span>
+                        <span class="stat-item">👀 2.9k views</span>
+                    </div>
+                    <a href="CommonSQLMisconception.html" class="blog-link">Read Article →</a>
+                </article>
+            </div>
+            <div class="blog-cta">
+                <a href="https://sqlonline.in" class="btn-secondary">View All Posts</a>
+            </div>
+        </div>
+    </section>
 
-							<!-- Section -->
-								<section>
-									<header class="major">
-										<h2>My Most Viewed Questions</h2>
-									</header>
-									<div class="posts">
-										<article>
-											<a href="https://www.youtube.com/watch?v=EZrWqAghZuo" aria-label="Customer Retention SQL video on YouTube" target="_blank" class="image"><img src="images/Swiggy Retention SQL.webp" alt="" loading="lazy" width="640" height="360" /></a>
-											<h3>Customer Retention | SQL
-											</h3>
-											<p>TBD</p>
-											<ul class="actions">
-												<li><a href="https://www.youtube.com/watch?v=EZrWqAghZuo" aria-label="Customer Retention SQL video on YouTube" class="button">Click to Watch</a></li>
-											</ul>
-										</article>
-										<article>
-											<a href="https://youtu.be/4v8VReN5_Q8" aria-label="Root Cause Analysis video on YouTube" target="_blank" class="image"><img src="images/Root-cause-analysis.avif" alt="" loading="lazy" width="640" height="360" /></a>
-											<h3>Mastering the art of Root Cause Analysis</h3>
-											<p>Click here for the Figma File</p>
-											<ul class="actions">
-												<li><a href="https://shorturl.at/zCOP2" aria-label="Root Cause Analysis video on YouTube" class="button">Download Figma File</a></li>
-											</ul>
-										</article>
-										<article>
-											<a href="https://youtu.be/i-_ZI4TYENs" aria-label="Longest Winning Streak SQL video on YouTube" class="image"><img src="images/Longest Winning Streak.webp" alt="" loading="lazy" width="640" height="360" /></a>
-											<h3>Longest Winning Streak | SQL</h3>
-											<p>TBD</p>
-											<ul class="actions">
-												<li><a href="https://youtu.be/i-_ZI4TYENs" aria-label="Longest Winning Streak SQL video on YouTube" class="button">Click to Watch</a></li>
-											</ul>
-										</article>
-										<article>
-											<a href="https://youtu.be/w4Yf9vP4GCw" aria-label="Product Metrics at Netflix video on YouTube" class="image"><img src="images/Netflix Product Metrics.webp" alt="" loading="lazy" width="640" height="360" /></a>
-											<h3>Product Metrics at Netflix</h3>
-											<p>TBD</p>
-											<ul class="actions">
-												<li><a href="https://youtu.be/w4Yf9vP4GCw" aria-label="Product Metrics at Netflix video on YouTube" class="button">Click to Watch</a></li>
-											</ul>
-										</article>
-									</div>
-								</section>
-						</div>
-					</div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3 class="footer-logo">SQLOnline.in</h3>
+                    <p class="footer-description">
+                        Professional SQL formatting tools and analytics education by Balaji Kasiraj. 
+                        Format, beautify, and learn SQL with our free online tools.
+                    </p>
+                    <div class="footer-social">
+                        <a href="https://linkedin.com/in/balajikasiraj" class="social-icon linkedin" target="_blank">💼</a>
+                        <a href="https://youtube.com/@BalajiKasiraj" class="social-icon youtube" target="_blank">📺</a>
+                        <a href="https://twitter.com/BalajiKasiraj" class="social-icon twitter" target="_blank">🐦</a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4 class="footer-title">Tools</h4>
+                        <ul class="footer-list">
+                            <li><a href="#formatter">SQL Formatter</a></li>
+                            <li><a href="#">SQL Validator</a></li>
+                            <li><a href="#">Query Optimizer</a></li>
+                            <li><a href="#">Database Designer</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h4 class="footer-title">Learn</h4>
+                        <ul class="footer-list">
+                            <li><a href="#tutorials">SQL Tutorials</a></li>
+                            <li><a href="#blog">Blog Posts</a></li>
+                            <li><a href="#">SQL Cheat Sheet</a></li>
+                            <li><a href="#">Practice Problems</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h4 class="footer-title">Resources</h4>
+                        <ul class="footer-list">
+                            <li><a href="#about">About Balaji</a></li>
+                            <li><a href="#">Contact</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>&copy; 2024 SQLOnline.in. All rights reserved. Created with ❤️ by Balaji Kasiraj</p>
+                </div>
+                <div class="footer-credits">
+                    <p>Empowering analysts and developers worldwide</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-				
+    <script>
+        // Simple SQL Formatter Function
+        function formatSQL() {
+            const input = document.getElementById('sqlInput').value;
+            const output = document.getElementById('sqlOutput');
+            
+            if (!input.trim()) {
+                output.value = '';
+                return;
+            }
+            
+            // Basic SQL formatting logic
+            let formatted = input
+                .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+                .replace(/,\s*/g, ',\n    ') // Add newlines after commas
+                .replace(/\bSELECT\b/gi, 'SELECT')
+                .replace(/\bFROM\b/gi, '\nFROM')
+                .replace(/\bWHERE\b/gi, '\nWHERE')
+                .replace(/\bAND\b/gi, '\n  AND')
+                .replace(/\bOR\b/gi, '\n  OR')
+                .replace(/\bJOIN\b/gi, '\nJOIN')
+                .replace(/\bINNER\s+JOIN\b/gi, '\nINNER JOIN')
+                .replace(/\bLEFT\s+JOIN\b/gi, '\nLEFT JOIN')
+                .replace(/\bRIGHT\s+JOIN\b/gi, '\nRIGHT JOIN')
+                .replace(/\bFULL\s+JOIN\b/gi, '\nFULL JOIN')
+                .replace(/\bON\b/gi, '\n  ON')
+                .replace(/\bGROUP\s+BY\b/gi, '\nGROUP BY')
+                .replace(/\bHAVING\b/gi, '\nHAVING')
+                .replace(/\bORDER\s+BY\b/gi, '\nORDER BY')
+                .replace(/\bLIMIT\b/gi, '\nLIMIT')
+                .replace(/\bOFFSET\b/gi, '\nOFFSET')
+                .replace(/\bUNION\b/gi, '\nUNION')
+                .replace(/\bINSERT\s+INTO\b/gi, 'INSERT INTO')
+                .replace(/\bVALUES\b/gi, '\nVALUES')
+                .replace(/\bUPDATE\b/gi, 'UPDATE')
+                .replace(/\bSET\b/gi, '\nSET')
+                .replace(/\bDELETE\b/gi, 'DELETE')
+                .trim();
+            
+            output.value = formatted;
+        }
+        
+        // Copy to clipboard function
+        function copyToClipboard() {
+            const output = document.getElementById('sqlOutput');
+            if (output.value.trim()) {
+                output.select();
+                document.execCommand('copy');
+                
+                // Visual feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#2563eb';
+                }, 2000);
+            }
+        }
 
-		<!-- Scripts -->
-    <!-- Defer dependent scripts -->
-    <script src="assets/js/util.js" defer></script>
-    <script src="assets/js/main.js" defer></script>
-	<script src="assets/js/syntax_validation.js" defer></script>
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.nav');
+            if (window.scrollY > 50) {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+            } else {
+                header.style.background = 'rgba(255, 255, 255, 0.85)';
+            }
+        });
 
-    <!-- Async for independent scripts -->
-    <script src="assets/js/scroll.js" async></script>
-    <script src="assets/js/script.js" async></script>
-
-	<script src="assets/js/copy-button.js"></script>
-
-	
-
-	</body>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
 </html>
