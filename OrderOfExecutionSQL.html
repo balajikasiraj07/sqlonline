@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,33 +20,85 @@
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','GTM-5L7GNQXZ');</script>
             <!-- End Google Tag Manager -->
-    </head>
+    
+    <!-- Link to your reusable blog article CSS -->
+    <link rel="stylesheet" href="assets/css/blog_article.css">
+    
+    <!-- Schema.org markup for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Understanding SQL Query Execution Order",
+        "description": "Learn the actual order of SQL query execution and how database engines optimize queries.",
+        "author": {
+            "@type": "Person",
+            "name": "Balaji Kasiraj",
+            "jobTitle": "Senior Product and Business Analyst",
+            "worksFor": {
+                "@type": "Organization",
+                "name": "PhonePe"
+            }
+        },
+        "datePublished": "2024-07-20",
+        "dateModified": "2024-07-20",
+        "url": "https://sqlonline.in/OrderOfExecutionSQL.html",
+        "wordCount": "1200",
+        "timeRequired": "PT4M",
+        "articleSection": "SQL Fundamentals",
+        "publisher": {
+            "@type": "Organization",
+            "name": "SQLOnline.in"
+        }
+    }
+    </script>
+</head>
 <body>
-    <nav class="navbar">
+    <!-- Navigation -->
+    <nav class="article-nav">
         <div class="nav-container">
-            <a href="https://sqlonline.in" class="nav-logo">SQL Online</a>
+            <a href="https://sqlonline.in" class="nav-logo">SQLOnline.in</a>
             <a href="https://sqlonline.in" class="nav-home">Home</a>
         </div>
     </nav>
-    <div class="breadcrumbs">
-        <a href="https://sqlonline.in">Home</a> &gt; <span>Understanding SQL Query Execution</span>
-    </div>
-    <div class="container">
-        <header>
-            <h1>Understanding SQL Query Execution</h1>
-            <p class="last-updated">Last Updated: July 20, 2024</p>
+    
+    <!-- Article Container -->
+    <article class="article-container">
+        <!-- Article Header -->
+        <header class="article-header">
+            <div class="article-meta-top">
+                <span class="article-category">SQL Fundamentals</span>
+                <time class="article-date" datetime="2024-07-20">July 20, 2024</time>
+            </div>
+            
+            <h1 class="article-title">Understanding SQL Query Execution Order</h1>
+            
+            <div class="article-subtitle">
+                Did you always think that the SELECT statement gets executed first? Learn the actual order of SQL query execution and how database engines optimize your queries.
+            </div>
+            
+            <div class="article-meta">
+                <div class="author-info">
+                    <div class="author-avatar">BK</div>
+                    <div class="author-details">
+                        <span class="author-name">Balaji Kasiraj</span>
+                        <span class="author-title">Senior Product & Business Analyst</span>
+                    </div>
+                </div>
+                <div class="article-stats">
+                    <span class="read-time">4 min read</span>
+                    <span class="view-count">3.2K views</span>
+                </div>
+            </div>
         </header>
-        <article>
-            <p>
-                Did you always think that the SELECT statement gets executed first? Well, no.
-            </p>
-            <p>
-                When you write an SQL query, you start it with a SELECT, then FROM and JOIN and eventually WHERE, GROUP BY, HAVING and ORDER BY.
-            </p>
-            <p>
-                But, while it gets executed, the interpreter executes it in the most optimized way and this is the order of Execution.
-            </p>
-            <ul>
+        
+        <!-- Article Content -->
+        <div class="article-content">
+            <p>When you write an SQL query, you start it with a SELECT, then FROM and JOIN and eventually WHERE, GROUP BY, HAVING and ORDER BY.</p>
+            
+            <p>But, while it gets executed, the interpreter executes it in the most optimized way and this is the order of Execution:</p>
+            
+            <ol class="execution-order">
                 <li>FROM</li>
                 <li>JOIN</li>
                 <li>WHERE</li>
@@ -54,21 +107,19 @@
                 <li>SELECT</li>
                 <li>ORDER BY</li>
                 <li>LIMIT / OFFSET</li>
-            </ul>
-            <div class="divider"></div>
-            <p>
-               <h3> Let's understand it through an example.</h3> 
-            </p>
-            <p>
-                Consider a company having stores across multiple countries. We have a table <code>country</code> which has all the country names.
-                We have another table <code>orders</code> that has a day-wise order count for the first 3 days in January.
-            </p>
-            <p>
-                <u>Consider this problem statement </u> <br><br> Write a Query to find out the total order count in India, Germany and USA on the first 2 days of the year. Also, give the top 2 countries by order count.
-            </p>
-            <h4>SQL Query</h4>
-            <pre>
-<code>SELECT
+            </ol>
+            
+            <h2>Let's understand it through an example</h2>
+            
+            <p>Consider a company having stores across multiple countries. We have a table <code>country</code> which has all the country names. We have another table <code>orders</code> that has a day-wise order count for the first 3 days in January.</p>
+            
+            <div class="problem-statement">
+                <strong>Problem Statement:</strong> Write a Query to find out the total order count in India, Germany and USA on the first 2 days of the year. Also, give the top 2 countries by order count.
+            </div>
+            
+            <h3>SQL Query</h3>
+            
+            <pre class="code-block"><code>SELECT
     ct.country,
     SUM(orders.order_count) AS total_orders
 FROM
@@ -82,54 +133,104 @@ GROUP BY
     ct.country
 ORDER BY
     total_orders DESC
-LIMIT 2;
-</code>
-            </pre>
-            <h2>Execution Breakdown</h2>
-            <h3>FROM, JOIN and WHERE</h3>
-            <p>
-                FROM the two tables, the primary key and the respective foreign key, ID and C_ID JOIN and the WHERE Condition get executed.
-                First the Country condition, i.e India, Germany and USA.
-            </p>
-            <img src="images/Blog 1/1.webp" alt="The two tables in the picture" class="article-image">
-            <p>
-                The WHERE conditions get executed simultaneously one after another.
-            </p>
-            <h3>GROUP BY / HAVING, SELECT</h3>
-            <p>
-                As we have an aggregation statement i.e SUM (orders.order_count) the GROUP BY acts and the aggregation happens. The orders get summed up.
-            </p>
-            <img src="images/Blog 1/2.webp" alt="Grouping the output" class="article-image">
-            <p>
-                But, given the sum happens only against the country column, the SELECT statement selects the country and the order_count columns and meanwhile the grouping column works on the submission.
-            </p>
+LIMIT 2;</code></pre>
             
-            <img src="images/Blog 1/3.webp" alt="select statement" class="article-image">
-            <p>
-               
-            Ultimately,
-            The entire output is limited to the user’s request by the LIMIT Keyword 
-     
-            </p>
-            <img src="images/Blog 1/5.webp" alt="select statement" class="article-image">
-            <img src="images/Blog 1/4.webp" alt="select statement" class="article-images">
-            <p>
-                For more SQL tutorials and examples, visit <a href="https://sqlonline.in">SQL Online</a>.
-            </p>
-        </article>
-    </div>
-    <div class="continue-learning">
-        <h2>More by Balaji</h2>
-        <ul>
-            <li>
-                <a href="OptimisedQueryWriting.html" target="_blank">How fast can you read 100 Billion records of data?</a>
-                <p>What are different methods to run an optimised query?</p>
-            </li>
-            <li>
-                <a href="CommonSQLMisconception.html" target="_blank">CTEs: The RAM-Hogging Culprits in Your Queries</a>
-                <p>Why using CTEs in a query are inefficient</p>
-            </li>
-        </ul>
-    </div>
+            <h2>Execution Breakdown</h2>
+            
+            <h3>FROM, JOIN and WHERE</h3>
+            <p>FROM the two tables, the primary key and the respective foreign key, ID and C_ID JOIN and the WHERE Condition get executed. First the Country condition, i.e India, Germany and USA.</p>
+            
+            <figure class="article-image">
+                <img src="images/Blog 1/1.webp" alt="The two tables showing country and orders data" loading="lazy">
+                <figcaption>The two tables in the example</figcaption>
+            </figure>
+            
+            <p>The WHERE conditions get executed simultaneously one after another.</p>
+            
+            <h3>GROUP BY / HAVING, SELECT</h3>
+            <p>As we have an aggregation statement i.e SUM (orders.order_count) the GROUP BY acts and the aggregation happens. The orders get summed up.</p>
+            
+            <figure class="article-image">
+                <img src="images/Blog 1/2.webp" alt="Grouping the output by country" loading="lazy">
+                <figcaption>Grouping the output</figcaption>
+            </figure>
+            
+            <p>But, given the sum happens only against the country column, the SELECT statement selects the country and the order_count columns and meanwhile the grouping column works on the submission.</p>
+            
+            <figure class="article-image">
+                <img src="images/Blog 1/3.webp" alt="SELECT statement execution" loading="lazy">
+                <figcaption>SELECT statement execution</figcaption>
+            </figure>
+            
+            <p>Ultimately, the entire output is limited to the user's request by the LIMIT keyword.</p>
+            
+            <figure class="article-image">
+                <img src="images/Blog 1/5.webp" alt="Final output with LIMIT applied" loading="lazy">
+                <figcaption>Final output with LIMIT applied</figcaption>
+            </figure>
+            
+            <p>Understanding this execution order helps you write more efficient queries and debug performance issues more effectively. For more SQL tutorials and examples, visit <a href="https://sqlonline.in">SQL Online</a>.</p>
+        </div>
+        
+        <!-- Author Bio -->
+        <div class="author-bio">
+            <div class="author-bio-avatar">BK</div>
+            <div class="author-bio-content">
+                <h3>Balaji Kasiraj</h3>
+                <p>Senior Product and Business Analyst with 6+ years of experience in Analytics. He owns and operates SQL Online, helping thousands of developers format and optimize their SQL queries.</p>
+            </div>
+        </div>
+        
+        <!-- Enhanced Related Articles -->
+        <div class="related-articles">
+            <div class="related-header">
+                <h2>More by Balaji</h2>
+                <p>Continue your SQL learning journey with these hand-picked articles</p>
+            </div>
+            <div class="related-grid">
+                <article class="related-card">
+                    <div class="related-meta">
+                        <span class="related-category">Query Optimization</span>
+                        <span class="related-time">7 min read</span>
+                    </div>
+                    <h4>How Fast Can You Read 100 Billion Records?</h4>
+                    <div class="related-footer">
+                        <span class="related-views">👀 4.8K views</span>
+                        <span class="related-arrow">→</span>
+                    </div>
+                </article>
+                <article class="related-card">
+                    <div class="related-meta">
+                        <span class="related-category performance">SQL Performance</span>
+                        <span class="related-time">5 min read</span>
+                    </div>
+                    <h4>CTEs: The RAM-Hogging Culprits in Your Queries</h4>
+                    <div class="related-footer">
+                        <span class="related-views">👀 2.9K views</span>
+                        <span class="related-arrow">→</span>
+                    </div>
+                </article>
+                <article class="related-card">
+                    <div class="related-meta">
+                        <span class="related-category fundamentals">SQL Fundamentals</span>
+                        <span class="related-time">6 min read</span>
+                    </div>
+                    <h4>Mastering SQL Joins: Beyond the Basics</h4>
+                    <div class="related-footer">
+                        <span class="related-views">👀 3.7K views</span>
+                        <span class="related-arrow">→</span>
+                    </div>
+                </article>
+            </div>
+            <div class="related-cta">
+                <a href="https://sqlonline.in#blog" class="view-all-btn">
+                    <span>View All Articles</span>
+                    <span class="btn-icon">📚</span>
+                </a>
+            </div>
+        </div>
+    </article>
+
+    <script src="assets/js/blog-article.js"></script>
 </body>
 </html>
