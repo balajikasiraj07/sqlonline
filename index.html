@@ -336,7 +336,7 @@ SELECT users.name, orders.total, products.name FROM users JOIN orders ON users.i
                 </article>
             </div>
             <div class="blog-cta">
-                <a href="https://sqlonline.in" class="btn-secondary">View All Posts</a>
+                <a href="blog_section.html" class="btn-secondary">View All Posts</a>
             </div>
         </div>
     </section>
@@ -444,25 +444,6 @@ SELECT users.name, orders.total, products.name FROM users JOIN orders ON users.i
             output.value = formatted;
         }
         
-        // Copy to clipboard function
-        function copyToClipboard() {
-            const output = document.getElementById('sqlOutput');
-            if (output.value.trim()) {
-                output.select();
-                document.execCommand('copy');
-                
-                // Visual feedback
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = 'Copied!';
-                btn.style.background = '#10b981';
-                
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = '#2563eb';
-                }, 2000);
-            }
-        }
 
         // Header scroll effect
         window.addEventListener('scroll', () => {
