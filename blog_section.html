@@ -180,37 +180,36 @@
         ]
     }
     </script>
-    <script src="assets/js/auto-breadcrumb.js"></script>
+    <script src="assets/js/auto-breadcrumb.js" defer></script>
 
-
-    <!-- Functional category filtering -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterBtns = document.querySelectorAll('.filter-btn');
-            const blogCards = document.querySelectorAll('.blog-card:not(.featured)');
-            
-            filterBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Update active state
-                    filterBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const filterText = this.textContent.toLowerCase();
-                    
-                    blogCards.forEach(card => {
-                        if (filterText === 'all posts') {
-                            card.style.display = 'block';
-                        } else {
-                            const hasCategory = card.className.includes(`category-${filterText}`) ||
-                                              card.querySelector('.blog-category').textContent.toLowerCase().includes(filterText);
-                            card.style.display = hasCategory ? 'block' : 'none';
-                        }
-                    });
+<!-- Functional category filtering -->
+<script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const blogCards = document.querySelectorAll('.blog-card:not(.featured)');
+        
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Update active state
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filterText = this.textContent.toLowerCase();
+                
+                blogCards.forEach(card => {
+                    if (filterText === 'all posts') {
+                        card.style.display = 'block';
+                    } else {
+                        const hasCategory = card.className.includes(`category-${filterText}`) ||
+                                          card.querySelector('.blog-category').textContent.toLowerCase().includes(filterText);
+                        card.style.display = hasCategory ? 'block' : 'none';
+                    }
                 });
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>

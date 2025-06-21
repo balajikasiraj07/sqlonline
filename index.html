@@ -14,9 +14,8 @@
 		<link rel="icon" type="image/x-icon" href="favicon.ico">
 		<title>SQL Formatter Online | Free SQL Query Beautifier Tool | SQL Online</title>
 		<link rel="stylesheet" href="assets/css/main.css">
-		<link rel="stylesheet" href="assets/css/breadcrumb.css">
-		<script src="https://apis.google.com/js/platform.js" async></script>
-		<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="kasirajubalaji" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5cb5f4" data-position="Right" data-x_margin="25" data-y_margin="25" async></script>
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="kasirajubalaji" data-description="Support me on Buy me a coffee!" data-message="" data-color="#5cb5f4" data-position="Right" data-x_margin="25" data-y_margin="25" async defer></script>
 		<!-- Google Tag Manager -->
 		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -403,51 +402,73 @@ SELECT users.name, orders.total, products.name FROM users JOIN orders ON users.i
             </div>
         </div>
     </footer>
-	<script src="assets/js/auto-breadcrumb.js"></script>
 
-    <script>
-        // Simple SQL Formatter Function
-        function formatSQL() {
-            const input = document.getElementById('sqlInput').value;
-            const output = document.getElementById('sqlOutput');
-            
-            if (!input.trim()) {
-                output.value = '';
-                return;
-            }
-            
-            // Basic SQL formatting logic
-            let formatted = input
-                .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-                .replace(/,\s*/g, ',\n    ') // Add newlines after commas
-                .replace(/\bSELECT\b/gi, 'SELECT')
-                .replace(/\bFROM\b/gi, '\nFROM')
-                .replace(/\bWHERE\b/gi, '\nWHERE')
-                .replace(/\bAND\b/gi, '\n  AND')
-                .replace(/\bOR\b/gi, '\n  OR')
-                .replace(/\bJOIN\b/gi, '\nJOIN')
-                .replace(/\bINNER\s+JOIN\b/gi, '\nINNER JOIN')
-                .replace(/\bLEFT\s+JOIN\b/gi, '\nLEFT JOIN')
-                .replace(/\bRIGHT\s+JOIN\b/gi, '\nRIGHT JOIN')
-                .replace(/\bFULL\s+JOIN\b/gi, '\nFULL JOIN')
-                .replace(/\bON\b/gi, '\n  ON')
-                .replace(/\bGROUP\s+BY\b/gi, '\nGROUP BY')
-                .replace(/\bHAVING\b/gi, '\nHAVING')
-                .replace(/\bORDER\s+BY\b/gi, '\nORDER BY')
-                .replace(/\bLIMIT\b/gi, '\nLIMIT')
-                .replace(/\bOFFSET\b/gi, '\nOFFSET')
-                .replace(/\bUNION\b/gi, '\nUNION')
-                .replace(/\bINSERT\s+INTO\b/gi, 'INSERT INTO')
-                .replace(/\bVALUES\b/gi, '\nVALUES')
-                .replace(/\bUPDATE\b/gi, 'UPDATE')
-                .replace(/\bSET\b/gi, '\nSET')
-                .replace(/\bDELETE\b/gi, 'DELETE')
-                .trim();
-            
-            output.value = formatted;
+    <script src="assets/js/auto-breadcrumb.js" defer></script>
+
+<script>
+    // Keep the formatSQL function inline for immediate functionality
+    function formatSQL() {
+        const input = document.getElementById('sqlInput').value;
+        const output = document.getElementById('sqlOutput');
+        
+        if (!input.trim()) {
+            output.value = '';
+            return;
         }
         
+        // Basic SQL formatting logic
+        let formatted = input
+            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+            .replace(/,\s*/g, ',\n    ') // Add newlines after commas
+            .replace(/\bSELECT\b/gi, 'SELECT')
+            .replace(/\bFROM\b/gi, '\nFROM')
+            .replace(/\bWHERE\b/gi, '\nWHERE')
+            .replace(/\bAND\b/gi, '\n  AND')
+            .replace(/\bOR\b/gi, '\n  OR')
+            .replace(/\bJOIN\b/gi, '\nJOIN')
+            .replace(/\bINNER\s+JOIN\b/gi, '\nINNER JOIN')
+            .replace(/\bLEFT\s+JOIN\b/gi, '\nLEFT JOIN')
+            .replace(/\bRIGHT\s+JOIN\b/gi, '\nRIGHT JOIN')
+            .replace(/\bFULL\s+JOIN\b/gi, '\nFULL JOIN')
+            .replace(/\bON\b/gi, '\n  ON')
+            .replace(/\bGROUP\s+BY\b/gi, '\nGROUP BY')
+            .replace(/\bHAVING\b/gi, '\nHAVING')
+            .replace(/\bORDER\s+BY\b/gi, '\nORDER BY')
+            .replace(/\bLIMIT\b/gi, '\nLIMIT')
+            .replace(/\bOFFSET\b/gi, '\nOFFSET')
+            .replace(/\bUNION\b/gi, '\nUNION')
+            .replace(/\bINSERT\s+INTO\b/gi, 'INSERT INTO')
+            .replace(/\bVALUES\b/gi, '\nVALUES')
+            .replace(/\bUPDATE\b/gi, 'UPDATE')
+            .replace(/\bSET\b/gi, '\nSET')
+            .replace(/\bDELETE\b/gi, 'DELETE')
+            .trim();
+        
+        output.value = formatted;
+    }
 
+    // Copy to clipboard function
+    function copyToClipboard() {
+        const output = document.getElementById('sqlOutput');
+        if (output.value.trim()) {
+            output.select();
+            document.execCommand('copy');
+            
+            // Visual feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.style.background = '#10b981';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '#2563eb';
+            }, 2000);
+        }
+    }
+
+    // Defer non-critical functionality
+    document.addEventListener('DOMContentLoaded', function() {
         // Header scroll effect
         window.addEventListener('scroll', () => {
             const header = document.querySelector('.nav');
@@ -471,6 +492,7 @@ SELECT users.name, orders.total, products.name FROM users JOIN orders ON users.i
                 }
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>
