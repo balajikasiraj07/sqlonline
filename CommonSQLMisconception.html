@@ -24,131 +24,94 @@
             <!-- End Google Tag Manager -->
     </head>
 <body>
-    <nav class="navbar">
+    <!-- Navigation -->
+    <nav class="article-nav">
         <div class="nav-container">
             <a href="https://sqlonline.in" class="nav-logo">SQL Online</a>
-            <a href="https://sqlonline.in" class="nav-home">Home</a>
+            <a href="https://sqlonline.in" class="nav-home">← Back to Home</a>
         </div>
     </nav>
 
-    <div class="breadcrumbs">
-        <a href="#">Home</a> &gt; <a href="#">Articles</a> &gt; CTEs: Addressing a Common SQL Misconception
-    </div>
-
-    <div class="container">
-        <header>
-            <h1>CTEs: The RAM-Hogging Culprits in Your Queries </h1>
-            <div class="last-updated">Last updated: August 3, 2024</div>
+    <!-- Main Article Container -->
+    <div class="article-container">
+        <!-- Article Header -->
+        <header class="article-header">
+            <div class="article-meta-top">
+                <span class="article-category category-performance">SQL Performance</span>
+                <span class="article-date">August 3, 2024</span>
+            </div>
+            
+            <h1 class="article-title">CTEs: The RAM-Hogging Culprits in Your Queries</h1>
+            <p class="article-subtitle">Common Table Expressions are widely used but there's a prevalent misconception about their memory handling. Learn why CTEs can be inefficient in your queries.</p>
+            
+            <div class="article-meta">
+                <div class="author-info">
+                    <div class="author-avatar">BK</div>
+                    <div class="author-details">
+                        <div class="author-name">Balaji Kasiraj</div>
+                        <div class="author-title">Senior Product & Business Analyst</div>
+                    </div>
+                </div>
+                <div class="article-stats">
+                    <span>📖 5 min read</span>
+                    <span>👀 2.9K views</span>
+                    <span>📅 August 2024</span>
+                </div>
+            </div>
         </header>
 
-        <article>
-            <a href="CommonSQLMisconception.html" aria-label="CTEs: Addressing a Common SQL Misconception" target="_blank" class="image"></a><img src="images/RAM Optimisation/meme.webp" alt="CTEs: Addressing a Common SQL Misconception" width="800" height="400" class="article-image">
+        <!-- Article Content -->
+        <div class="article-content">
+            <div class="article-image">
+                <img src="images/RAM Optimisation/meme.webp" alt="CTEs: Addressing a Common SQL Misconception" width="800" height="400" class="article-image">
+            </div>
 
             <h2>Understanding CTEs and Their Impact</h2>
-            <p>Common Table Expressions (CTEs) are widely used in SQL to simplify complex queries and enhance readability. However, there's a prevalent misconception about how they handle memory and execution. Let’s clarify this with an example and address some common misunderstandings.</p>
-
-            <h2>A Sample Query Using a CTE</h2>
-            <pre><code>
-WITH AuthorStats AS (
-    SELECT 
-        author_id,
-        COUNT(post_id) AS post_count,
-        SUM(views) AS total_views
-    FROM 
-        blog_posts
-    GROUP BY 
-        author_id
-)
-
-SELECT
-    top_posts.author_id AS top_author_by_posts,
-    top_posts.post_count,
-    top_views.author_id AS top_author_by_views,
-    top_views.total_views
-FROM
-    (SELECT 
-        author_id,
-        post_count
-    FROM 
-        AuthorStats
-    ORDER BY 
-        post_count DESC
-    LIMIT 5) AS top_posts
-
-    CROSS JOIN
-
-    (SELECT 
-        author_id,
-        total_views
-    FROM 
-        AuthorStats
-    ORDER BY 
-        total_views DESC
-    LIMIT 5) AS top_views;
-            </code></pre>
-
-            <h2>Hypothetical Scenario</h2>
-            <p>Consider a scenario like the above query. We have:</p>
-            <ul>
-                <li>Two Subqueries</li>
-                <li>One CTE</li>
-            </ul>
-            <p>What happens when the query executes?</p>
-            <ul>
-                <li>The CTE executes once.</li>
-                <li>The 2 subqueries use the output of the CTE one after another.</li>
-            </ul>
-            <p>The total time taken to execute is the sum of the CTE execution time and the two subqueries.<br> However, there's an important aspect called Processing Rate, which we can relate to RAM. This is a limited resource, and there is a cost associated with every unit of RAM.</p>
             
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7880814413550572"
-                crossorigin="anonymous"></script>
-            <!-- Ad 1 -->
-            <ins class="adsbygoogle"
-                style="display:block"
-                data-ad-client="ca-pub-7880814413550572"
-                data-ad-slot="3089105563"
-                data-ad-format="auto"
-                data-full-width-responsive="true"></ins>
-            <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+            <p>Common Table Expressions (CTEs) are widely used in SQL to simplify complex queries and enhance readability. However, there's a prevalent misconception about how they handle memory and execution.</p>
+
+            <p>The query executed in step 1 needs to be stored somewhere, which is the RAM. It occupies space (let's say 6 containers) and stays there until the query completes. This space remains occupied, whether it's being actively used or not. Now, the remainder of the query has only 6 containers to process the rest of the data.</p>
             
-            <h3>Explaining for Better Understanding</h3>
-            <p><strong>Using a CTE:</strong></p>
-            <p>Imagine you have 12 containers to process your data, and the data to be processed is 100 GB. <br>The query executed in step 1 needs to be stored somewhere, which is the RAM. It occupies space (let’s say 6 containers) and stays there until the query completes. This space remains occupied, whether it’s being actively used or not. Now, the remainder of the query has only 6 containers to process the rest of the data.</p>
-            <p><img src="images/RAM Optimisation/Container.webp" alt="CTE Example" class="article-image" loading="lazy" width="500" height="400"></p>
+            <div class="article-image">
+                <img src="images/RAM Optimisation/Container.webp" alt="CTE Example" class="article-image" loading="lazy" width="500" height="400">
+            </div>
 
             <p><strong>Using a Subquery Instead:</strong></p>
-            <p>The query at any point has the entirety of 12 containers to process the data.<br>More containers mean faster execution—here, potentially 2x faster because the query processes in parallel. Imagine each container processes 10 GB. Even if the subquery portion needs to be executed twice, there's sufficient processing space, and once completed, the rest of the query has all 12 containers available.
-                <br> This not only saves runtime but also optimizes query performance.</p>
+            
+            <p>The query at any point has the entirety of 12 containers to process the data. More containers mean faster execution—here, potentially 2x faster because the query processes in parallel. Imagine each container processes 10 GB. Even if the subquery portion needs to be executed twice, there's sufficient processing space, and once completed, the rest of the query has all 12 containers available.</p>
+            
+            <p>This not only saves runtime but also optimizes query performance.</p>
 
-            <h2>Best Practices </h2>
+            <h2>Best Practices</h2>
+            
             <p>To optimize performance and manage memory effectively:</p>
+            
             <ul>
-                <li><strong>Materialize Large CTEs:</strong> <br> For large datasets used multiple times, consider creating temporary tables instead of CTEs. <br> This can reduce RAM consumption and improve performance.</li>
-                <li><strong>Use Subqueries: </strong><br> Run them all as Subqueries. This should give you enough processing space to process them faster.</li>
+                <li><strong>Materialize Large CTEs:</strong><br>For large datasets used multiple times, consider creating temporary tables instead of CTEs.<br>This can reduce RAM consumption and improve performance.</li>
+                <li><strong>Use Subqueries:</strong><br>Run them all as Subqueries. This should give you enough processing space to process them faster.</li>
             </ul>
-        </article>
-    </div>
-    <div class="subscribe-container">
-        <div class="g-ytsubscribe" data-channelid="UCqYQw1g5z_4E3-h3cPkRXKg" data-layout="full" data-count="default"></div>
-    </div>
 
-    <footer>
-        <div class="continue-learning">
-            <h2>More by Balaji</h2>
-            <ul>
-                <li>
-                    <a href="OrderOfExecutionSQL.html" target="_blank">How does SQL Execute a Query?</a>
-                    <p>Read more on how an SQL Query executes</p>
-                </li>
-                <li>
-                    <a href="OptimisedQueryWriting.html" target="_blank">How fast can you read 100 Billion records of data?</a>
-                    <p>What are different methods to run an optimised query?</p>
-                </li>
-
-            </ul>
+            <div class="subscribe-container">
+                <div class="g-ytsubscribe" data-channelid="UCqYQw1g5z_4E3-h3cPkRXKg" data-layout="full" data-count="default"></div>
+            </div>
         </div>
-    </footer>
-    
+
+        <!-- Author Bio -->
+        <div class="author-bio">
+            <div class="author-bio-avatar">BK</div>
+            <div class="author-bio-content">
+                <h3>Balaji Kasiraj</h3>
+                <p>Senior Product and Business Analyst with 6+ years of experience in Analytics. He owns and operates SQL Online, helping thousands of developers format and optimize their SQL queries.</p>
+            </div>
+        </div>
+
+        <!-- Enhanced Related Articles -->
+        <div id="related-articles-container">
+            <!-- Related articles will be dynamically generated here -->
+        </div>
+        
+    </div>
+
+    <script src="assets/js/related-articles.js"></script>
 </body>
+</html>
