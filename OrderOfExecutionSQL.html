@@ -6,13 +6,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="robots" content="index, follow">
         <meta name="author" content="Balaji Kasiraj">
-        <meta name="description" content="Learn about the execution order of SQL queries with a detailed example and explanation.">
-        <meta name="keywords" content="SQL output giving null, SQL execution order, SQL tutorial, SQL having keyword, SQL query">
-        <meta property="og:url" content="https://sqlonline.in/OrderOfExecutionSQL.html">
+        <meta name="description" content="Understand SQL query execution order step-by-step. Learn why SELECT doesn't run first and how database engines process FROM, WHERE, GROUP BY, HAVING, ORDER BY statements.">        
+        <meta name="keywords" content="sql query execution order, how sql queries are processed, sql statement execution sequence, sql having vs where, sql execution order explained, database query processing, sql optimizer, sql logical order">        <meta property="og:url" content="https://sqlonline.in/OrderOfExecutionSQL.html">
         <meta name="google-adsense-account" content="ca-pub-7880814413550572">
         <link rel="canonical" href="https://sqlonline.in/OrderOfExecutionSQL.html">
         <title>Understanding Order of Execution of SQL Query | SQL Formatter Online</title>
         <link rel="stylesheet" href="assets/css/blog_article.css">
+        <link rel="stylesheet" href="assets/css/breadcrumb.css">
+
         <!-- Google Tag Manager -->
 		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -20,9 +21,6 @@
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','GTM-5L7GNQXZ');</script>
             <!-- End Google Tag Manager -->
-    
-    <!-- Link to your reusable blog article CSS -->
-    <link rel="stylesheet" href="assets/css/blog_article.css">
     
     <!-- Schema.org markup for SEO -->
     <script type="application/ld+json">
@@ -52,6 +50,30 @@
         }
     }
     </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "Does SELECT statement execute first in SQL?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "No, despite being written first, SELECT is actually one of the last operations to execute. The logical order starts with FROM, then WHERE, GROUP BY, HAVING, and finally SELECT."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What order does SQL execute statements?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "SQL executes in this logical order: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT"
+                    }
+                }
+            ]
+        }
+        </script>
 </head>
 <body>
     <!-- Navigation -->
@@ -69,6 +91,9 @@
             <div class="article-meta-top">
                 <span class="article-category">SQL Fundamentals</span>
                 <time class="article-date" datetime="2024-07-20">July 20, 2024</time>
+            </div>
+            <div>
+                <nav class="breadcrumb" aria-label="Breadcrumb">
             </div>
             
             <h1 class="article-title">Understanding SQL Query Execution Order</h1>
@@ -188,5 +213,6 @@ LIMIT 2;</code></pre>
     </article>
 
     <script src="assets/js/related-articles.js"></script>
+    <script src="assets/js/auto-breadcrumb.js"></script>
 </body>
 </html>
