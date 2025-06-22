@@ -200,7 +200,7 @@ SELECT users.name, orders.total, products.name FROM users JOIN orders ON users.i
                     </div>
                 </div>
                 <div class="about-links">
-                    <a href="https://linkedin.com/in/balajikasiraj" class="social-btn linkedin" target="_blank">
+                    <a href="https://www.linkedin.com/in/balajikasiraju/" class="social-btn linkedin" target="_blank">
                         <span class="btn-icon">💼</span>
                         <span>Connect on LinkedIn</span>
                     </a>
@@ -353,7 +353,7 @@ SELECT users.name, orders.total, products.name FROM users JOIN orders ON users.i
                         Format, beautify, and learn SQL with our free online tools.
                     </p>
                     <div class="footer-social">
-                        <a href="https://linkedin.com/in/balajikasiraj" class="social-icon linkedin" target="_blank">💼</a>
+                        <a href="https://www.linkedin.com/in/balajikasiraju/" class="social-icon linkedin" target="_blank">💼</a>
                         <a href="https://youtube.com/@BalajiKasiraj" class="social-icon youtube" target="_blank">📺</a>
                         <a href="https://twitter.com/BalajiKasiraj" class="social-icon twitter" target="_blank">🐦</a>
                     </div>
@@ -408,44 +408,64 @@ SELECT users.name, orders.total, products.name FROM users JOIN orders ON users.i
 <script>
     // Keep the formatSQL function inline for immediate functionality
     function formatSQL() {
-        const input = document.getElementById('sqlInput').value;
-        const output = document.getElementById('sqlOutput');
-        
-        if (!input.trim()) {
-            output.value = '';
-            return;
-        }
-        
-        // Basic SQL formatting logic
-        let formatted = input
-            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-            .replace(/,\s*/g, ',\n    ') // Add newlines after commas
-            .replace(/\bSELECT\b/gi, 'SELECT')
-            .replace(/\bFROM\b/gi, '\nFROM')
-            .replace(/\bWHERE\b/gi, '\nWHERE')
-            .replace(/\bAND\b/gi, '\n  AND')
-            .replace(/\bOR\b/gi, '\n  OR')
-            .replace(/\bJOIN\b/gi, '\nJOIN')
-            .replace(/\bINNER\s+JOIN\b/gi, '\nINNER JOIN')
-            .replace(/\bLEFT\s+JOIN\b/gi, '\nLEFT JOIN')
-            .replace(/\bRIGHT\s+JOIN\b/gi, '\nRIGHT JOIN')
-            .replace(/\bFULL\s+JOIN\b/gi, '\nFULL JOIN')
-            .replace(/\bON\b/gi, '\n  ON')
-            .replace(/\bGROUP\s+BY\b/gi, '\nGROUP BY')
-            .replace(/\bHAVING\b/gi, '\nHAVING')
-            .replace(/\bORDER\s+BY\b/gi, '\nORDER BY')
-            .replace(/\bLIMIT\b/gi, '\nLIMIT')
-            .replace(/\bOFFSET\b/gi, '\nOFFSET')
-            .replace(/\bUNION\b/gi, '\nUNION')
-            .replace(/\bINSERT\s+INTO\b/gi, 'INSERT INTO')
-            .replace(/\bVALUES\b/gi, '\nVALUES')
-            .replace(/\bUPDATE\b/gi, 'UPDATE')
-            .replace(/\bSET\b/gi, '\nSET')
-            .replace(/\bDELETE\b/gi, 'DELETE')
-            .trim();
-        
-        output.value = formatted;
+    const input = document.getElementById('sqlInput').value;
+    const output = document.getElementById('sqlOutput');
+    const formatBtn = document.querySelector('.format-btn');
+    
+    if (!input.trim()) {
+        output.value = '';
+        return;
     }
+    
+    // Disable button during processing
+    formatBtn.disabled = true;
+    formatBtn.textContent = 'Formatting...';
+    
+    // Send SQL to process.php
+    fetch('process.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+            'input-query': input,
+            'indentation': '\t' // You can make this configurable
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(formattedSQL => {
+        output.value = formattedSQL;
+        
+        // Success feedback
+        formatBtn.textContent = 'Formatted!';
+        formatBtn.style.background = '#10b981';
+        
+        setTimeout(() => {
+            formatBtn.textContent = 'Format';
+            formatBtn.style.background = '#2563eb';
+            formatBtn.disabled = false;
+        }, 1500);
+    })
+    .catch(error => {
+        console.error('Formatting error:', error);
+        output.value = 'Error: Could not format SQL. Please check your syntax.';
+        
+        // Error feedback
+        formatBtn.textContent = 'Error!';
+        formatBtn.style.background = '#ef4444';
+        
+        setTimeout(() => {
+            formatBtn.textContent = 'Format';
+            formatBtn.style.background = '#2563eb';
+            formatBtn.disabled = false;
+        }, 2000);
+    });
+}
 
     // Copy to clipboard function
     function copyToClipboard() {
